@@ -1,0 +1,765 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  RefreshCw, 
+  CheckCircle2, 
+  AlertCircle, 
+  ShieldCheck, 
+  Trash2, 
+  LineChart, 
+  BarChart3, 
+  Users, 
+  Target, 
+  ArrowDownRight, 
+  TrendingUp,
+  Settings,
+  Key,
+  X,
+  ExternalLink,
+  ChevronRight,
+  Shield,
+  Zap,
+  Info,
+  FileText
+} from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { motion, AnimatePresence } from 'motion/react';
+import { getSquareHeaders } from '../lib/config';
+import { Link } from 'react-router-dom';
+
+export default function Admin() {
+  const [syncing, setSyncing] = useState(false);
+  const [cleaning, setCleaning] = useState(false);
+  const [status, setStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  
+  // Local state for temporary keys
+  const [sessionKeys, setSessionKeys] = useState({
+    GEMINI_API_KEY: localStorage.getItem('SESSION_GEMINI_API_KEY') || '',
+    SQUARE_ACCESS_TOKEN: localStorage.getItem('SESSION_SQUARE_ACCESS_TOKEN') || '',
+    VITE_SQUARE_APP_ID: localStorage.getItem('SESSION_VITE_SQUARE_APP_ID') || '',
+    VITE_SQUARE_LOCATION_ID: localStorage.getItem('SESSION_VITE_SQUARE_LOCATION_ID') || '',
+    GOOGLE_MAPS_API_KEY: localStorage.getItem('SESSION_GOOGLE_MAPS_API_KEY') || '',
+    GOOGLE_PLACE_ID: localStorage.getItem('SESSION_GOOGLE_PLACE_ID') || ''
+  });
+
+  const saveSessionKeys = () => {
+    Object.entries(sessionKeys).forEach(([key, value]) => {
+      localStorage.setItem(`SESSION_${key}`, value as string);
+    });
+    window.location.reload(); // Reload to apply keys across the app
+  };
+
+  // Real-time env check (Vite + Session Overrides)
+  const envStatus = {
+    gemini: !!(process.env.GEMINI_API_KEY || sessionKeys.GEMINI_API_KEY),
+    squareToken: !!(process.env.SQUARE_ACCESS_TOKEN || sessionKeys.SQUARE_ACCESS_TOKEN),
+    squareApp: !!(import.meta.env.VITE_SQUARE_APP_ID || sessionKeys.VITE_SQUARE_APP_ID),
+    squareLoc: !!(import.meta.env.VITE_SQUARE_LOCATION_ID || sessionKeys.VITE_SQUARE_LOCATION_ID),
+    maps: !!(process.env.GOOGLE_MAPS_API_KEY || sessionKeys.GOOGLE_MAPS_API_KEY)
+  };
+
+  // Behavior Tracking State (Simulated)
+  const stats = {
+    totalQuotes: 124,
+    conversionRate: '18%',
+    averageTicket: '$285',
+    dropOffPoints: [
+      { step: 'Contact Info', rate: '10%' },
+      { step: 'Vehicle Selection', rate: '25%' },
+      { step: 'Service Selection', rate: '15%' },
+      { step: 'Final Review', rate: '32%' },
+    ],
+    popularServices: [
+        { name: 'Signature Interior Reset', percentage: '65%', price: '$180' },
+        { name: 'Showroom Full Detail', percentage: '22%', price: '$350' },
+        { name: 'Ceramic Coating', percentage: '13%', price: '$950' },
+    ]
+  };
+
+    const handleSync = async () => {
+    setSyncing(true);
+    setStatus(null);
+    console.log('🔄 Initiating Preservation Sync...');
+    try {
+      const response = await fetch('/api/admin/sync-square', {
+        method: 'POST',
+        headers: getSquareHeaders()
+      });
+      
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || `Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setStatus({ success: true, message: data.message });
+      } else {
+        setStatus({ success: false, message: data.error });
+      }
+    } catch (err: any) {
+      console.error('Frontend Sync Error:', err);
+      setStatus({ success: false, message: err.message || 'Failed to connect to server' });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleCleanup = async () => {
+    setCleaning(true);
+    setStatus(null);
+    console.log('🧹 Initiating Deep Duplicate Cleanup...');
+    try {
+      const response = await fetch('/api/admin/remove-all-duplicates', {
+        method: 'POST',
+        headers: getSquareHeaders()
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || `Server error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setStatus({ success: true, message: data.message });
+      } else {
+        setStatus({ success: false, message: data.error });
+      }
+    } catch (err: any) {
+      console.error('Frontend Cleanup Error:', err);
+      setStatus({ success: false, message: err.message || 'Failed to connect to server' });
+    } finally {
+      setCleaning(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-50 pt-32 pb-24 font-sans">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* 1. Revenue & Behavior Stats */}
+            <div className="lg:col-span-8 space-y-8">
+                <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white italic font-black shadow-xl">IQ</div>
+                    <div>
+                        <h1 className="text-3xl font-black text-zinc-900 tracking-tighter italic">Revenue Intelligence</h1>
+                        <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">Behavior tracking & price optimization</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm space-y-2">
+                        <Users className="h-5 w-5 text-zinc-400" />
+                        <p className="text-xs font-black uppercase text-zinc-400 tracking-widest">Total Leads</p>
+                        <p className="text-3xl font-black text-zinc-900 italic">{stats.totalQuotes}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm space-y-2">
+                        <Target className="h-5 w-5 text-emerald-500" />
+                        <p className="text-xs font-black uppercase text-zinc-400 tracking-widest">Conversion</p>
+                        <p className="text-3xl font-black text-zinc-900 italic">{stats.conversionRate}</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm space-y-2">
+                        <TrendingUp className="h-5 w-5 text-emerald-500" />
+                        <p className="text-xs font-black uppercase text-zinc-400 tracking-widest">Avg Ticket</p>
+                        <p className="text-3xl font-black text-zinc-900 italic">{stats.averageTicket}</p>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+                    <div className="p-8 border-b border-zinc-50 flex justify-between items-center">
+                        <div>
+                            <h3 className="text-lg font-black italic tracking-tight">Funnel Drop-Off Points</h3>
+                            <p className="text-xs text-zinc-400">Where are you losing potential money?</p>
+                        </div>
+                        <BarChart3 className="h-5 w-5 text-zinc-300" />
+                    </div>
+                    <div className="p-8 space-y-6">
+                        {stats.dropOffPoints.map((point, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="flex justify-between text-xs font-black uppercase tracking-widest">
+                                    <span className="text-zinc-500">{point.step}</span>
+                                    <span className="text-red-500 flex items-center gap-1">
+                                        <ArrowDownRight className="h-3 w-3" /> {point.rate}
+                                    </span>
+                                </div>
+                                <div className="h-2 bg-zinc-50 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full bg-zinc-900 transition-all duration-1000" 
+                                        style={{ width: `${100 - parseInt(point.rate)}%` }} 
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden">
+                    <div className="p-8 border-b border-zinc-50 flex justify-between items-center bg-zinc-950 text-white">
+                        <div>
+                            <h3 className="text-lg font-black italic tracking-tight">Service Popularity vs. Pricing</h3>
+                            <p className="text-xs text-zinc-500">Is it time to raise rates?</p>
+                        </div>
+                        <LineChart className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div className="p-8">
+                        <div className="divide-y divide-zinc-50">
+                            {stats.popularServices.map((service, index) => (
+                                <div key={index} className="py-4 flex items-center justify-between group">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-xs font-black text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                                            {index + 1}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-black text-zinc-900">{service.name}</p>
+                                            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{service.price} Base</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-lg font-black italic">{service.percentage}</p>
+                                        {parseInt(service.percentage) > 50 && (
+                                            <p className="text-[10px] font-black text-emerald-600 uppercase italic tracking-tighter underline">Over-utilized: +$15 Suggestion</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 2. Management Controls */}
+            <div className="lg:col-span-4 space-y-8">
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-zinc-100 overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <TrendingUp className="w-24 h-24 text-zinc-900" />
+                    </div>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white shadow-xl">
+                            <ShieldCheck className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-black italic tracking-tight">API Setup & Health</h2>
+                    </div>
+                    
+                    <div className="space-y-4 relative z-10">
+                        <div className="p-4 bg-zinc-50 rounded-2xl space-y-3">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Gemini AI (Chat/Scan)</p>
+                                <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${process.env.GEMINI_API_KEY ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                    {process.env.GEMINI_API_KEY ? 'Connected' : 'Missing Key'}
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-normal">
+                                Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank" className="text-blue-500 underline">Google AI Studio</a>. Add <code>GEMINI_API_KEY</code> to Settings.
+                            </p>
+                        </div>
+
+                        <div className="p-4 bg-zinc-50 rounded-2xl space-y-3 border-l-4 border-zinc-200">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Configuration Hub</p>
+                                <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${envStatus.squareToken && envStatus.squareApp ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                    {(envStatus.squareToken && envStatus.squareApp) ? 'Live' : 'Action Required'}
+                                </span>
+                            </div>
+                            <div className="space-y-4">
+                                <p className="text-[10px] text-zinc-400 leading-normal">
+                                    Manage your Square payment integration and Gemini AI settings in one place.
+                                </p>
+                                <Button 
+                                    onClick={() => setIsConfigOpen(true)}
+                                    className="w-full h-12 rounded-xl bg-zinc-900 border-0 text-white font-black italic shadow-lg shadow-zinc-200 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <Settings className="h-4 w-4" />
+                                    Launch Setup Wizard
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-zinc-50 rounded-2xl space-y-3">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Google Maps (Reviews)</p>
+                                <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${envStatus.maps ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                    {envStatus.maps ? 'Configured' : 'Missing Key'}
+                                </span>
+                            </div>
+                            <div className="space-y-3">
+                                <p className="text-[10px] text-zinc-400 leading-normal">
+                                    <strong>Note:</strong> If you see "REQUEST_DENIED", ensure the <strong>Places API (Legacy)</strong> is enabled in your Google Cloud project and billing is attached.
+                                </p>
+                                <a 
+                                    href="https://console.cloud.google.com/google/maps-apis/api-list" 
+                                    target="_blank" 
+                                    className="text-[9px] text-blue-500 font-bold flex items-center gap-1 hover:underline"
+                                >
+                                    Check API Status <ExternalLink className="h-2 w-2" />
+                                </a>
+                            </div>
+                        </div>
+
+                        <div className="p-4 bg-zinc-50 rounded-2xl space-y-3 border-l-4 border-blue-500">
+                            <div className="flex justify-between items-center">
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Custom Domain Setup</p>
+                                <span className="px-2 py-0.5 rounded text-[8px] font-bold uppercase bg-blue-100 text-blue-700">
+                                    Pending
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-normal">
+                                To use <code>bryansdetailingomaha.com</code>, ensure your DNS CNAME points to the Development URL or use the platform's mapping service.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Image Management Section */}
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-zinc-100 overflow-hidden relative group">
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <LineChart className="w-24 h-24 text-zinc-900" />
+                    </div>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-xl">
+                            <BarChart3 className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-black italic tracking-tight">Media Library</h2>
+                    </div>
+                    
+                    <div className="space-y-4 relative z-10">
+                        <p className="text-xs text-zinc-500 font-medium leading-relaxed italic">
+                            Want to use your own photos? Follow these steps to replace the stock images:
+                        </p>
+                        
+                        <div className="p-4 bg-zinc-50 rounded-2xl space-y-3">
+                            <div className="flex gap-3">
+                                <div className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] font-black flex items-center justify-center shrink-0">1</div>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Upload to File Explorer</p>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-normal pl-8">
+                                Drag your JPG/PNG files into the <code className="bg-zinc-200 px-1 rounded text-zinc-900">public</code> folder in the left-hand sidebar.
+                            </p>
+                        </div>
+
+                        <div className="p-4 bg-zinc-50 rounded-2xl space-y-3">
+                            <div className="flex gap-3">
+                                <div className="w-5 h-5 rounded-full bg-zinc-900 text-white text-[10px] font-black flex items-center justify-center shrink-0">2</div>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">Reference in Data</p>
+                            </div>
+                            <p className="text-[10px] text-zinc-400 leading-normal pl-8">
+                                Update the <code className="bg-zinc-200 px-1 rounded text-zinc-900">image</code> path in <code className="bg-zinc-200 px-1 rounded text-zinc-900">src/data/services.ts</code> to match your filename.
+                            </p>
+                        </div>
+                        
+                        <div className="pt-4 text-center">
+                            <p className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">
+                                Need help? Ask the AI Assist
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-3xl p-8 shadow-sm border border-zinc-100">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-zinc-950 shadow-lg shadow-emerald-100">
+                            <ShieldCheck className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-black italic tracking-tight">Catalog Controls</h2>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="space-y-4">
+                            <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+                                <strong>Safety Sync:</strong> Scans Square for new services. Adds missing items with pre-calculated durations, but <span className="text-emerald-600 font-bold">never overwrites</span> your manual settings for existing items.
+                            </p>
+                            <Button 
+                                onClick={handleSync} 
+                                className="w-full h-14 rounded-2xl bg-zinc-900 font-black italic shadow-lg shadow-zinc-200"
+                                disabled={syncing || cleaning}
+                            >
+                                {syncing ? (
+                                    <>
+                                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                        Scanning & Adding...
+                                    </>
+                                ) : (
+                                    <>
+                                        <RefreshCw className="mr-2 h-4 w-4" />
+                                        Sync Missing Only
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+
+                        <div className="pt-6 border-t border-zinc-50">
+                            <p className="text-xs text-zinc-500 font-medium mb-3 leading-relaxed italic">
+                                <strong>Deep Clean:</strong> Merges duplicate items in your catalog and removes redundant variations. Use this if you see multiple sets of the same service.
+                            </p>
+                             <Button 
+                                variant="outline"
+                                onClick={handleCleanup} 
+                                className="w-full h-14 rounded-2xl text-red-600 border-red-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 font-black italic"
+                                disabled={syncing || cleaning}
+                            >
+                                {cleaning ? (
+                                    <>
+                                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                        Merging Duplicates...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Nuclear Cleanup & Merge
+                                    </>
+                                )}
+                            </Button>
+                            <p className="text-[10px] text-zinc-400 mt-2 text-center uppercase tracking-widest leading-tight px-4 font-bold">
+                                ⚠️ merging cannot be undone
+                            </p>
+                        </div>
+
+                        {status && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={`p-4 rounded-xl flex items-start gap-3 ${
+                                    status.success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'
+                                }`}
+                            >
+                                {status.success ? (
+                                    <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5" />
+                                ) : (
+                                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                                )}
+                                <p className="text-sm font-medium">{status.message}</p>
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="bg-zinc-900 rounded-[2.5rem] p-8 text-white">
+                    <h3 className="text-lg font-black italic tracking-tight mb-4">Deep Links</h3>
+                    <ul className="space-y-4">
+                        <li>
+                            <Link to="/admin/blog" className="flex items-center justify-between p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                                <span className="text-sm font-bold text-zinc-200">Blog Manager</span>
+                                <FileText className="h-4 w-4 text-emerald-500" />
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/admin/faq" className="flex items-center justify-between p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                                <span className="text-sm font-bold text-zinc-200">FAQ Manager</span>
+                                <Info className="h-4 w-4 text-blue-500" />
+                            </Link>
+                        </li>
+                        <li>
+                            <a href="https://squareup.com/dashboard/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                                <span className="text-sm font-bold text-zinc-200">Square Dashboard</span>
+                                <TrendingUp className="h-4 w-4 text-zinc-500" />
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://squareup.com/dashboard/staff/team" target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                                <span className="text-sm font-bold text-zinc-200">Personnel & Hours</span>
+                                <Users className="h-4 w-4 text-zinc-500" />
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {/* Setup Wizard Modal */}
+      <AnimatePresence>
+        {isConfigOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsConfigOpen(false)}
+              className="absolute inset-0 bg-zinc-950/60 backdrop-blur-md"
+            />
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              {/* Header */}
+              <div className="p-8 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center text-white">
+                    <Key className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black italic tracking-tight">API Setup Wizard</h2>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Connect your Business Infrastructure</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsConfigOpen(false)}
+                  className="p-2 hover:bg-zinc-200 rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-grow overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                
+                {/* 1. Square Payments Section */}
+                <section className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-8 bg-emerald-500 rounded-full" />
+                    <h3 className="text-lg font-black italic tracking-tight">1. Square Payments & Booking</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <p className="text-sm text-zinc-600 leading-relaxed">
+                        To process payments and sync your catalog, you need to connect your Square account.
+                      </p>
+                      <div className="space-y-2">
+                        <h4 className="text-[10px] font-black uppercase text-zinc-400 italic">Instructions</h4>
+                        <ul className="text-xs space-y-2 text-zinc-500">
+                          <li className="flex items-start gap-2">
+                            <ChevronRight className="h-3 w-3 mt-0.5 text-emerald-500 shrink-0" />
+                            <span>Log into <a href="https://developer.squareup.com" target="_blank" className="text-blue-500 underline font-bold">Square Developer</a></span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <ChevronRight className="h-3 w-3 mt-0.5 text-emerald-500 shrink-0" />
+                            <span>Create a <b>"Detailing App"</b></span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <ChevronRight className="h-3 w-3 mt-0.5 text-emerald-500 shrink-0" />
+                            <span>Copy the <b>Application ID</b> and <b>Access Token</b></span>
+                          </li>
+                        </ul>
+                      </div>
+                      <a 
+                        href="https://developer.squareup.com/apps" 
+                        target="_blank" 
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-100 transition-all"
+                      >
+                        Open Dashboard <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                    
+                    <div className="space-y-4 p-6 bg-zinc-50 rounded-[2rem] border border-zinc-100">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Current Health</span>
+                        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${envStatus.squareToken ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
+                          {envStatus.squareToken ? <Zap className="h-2 w-2" /> : <Shield className="h-2 w-2" />}
+                          {envStatus.squareToken ? 'Token Found' : 'Missing'}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Square Access Token</label>
+                          <input 
+                            type="password"
+                            value={sessionKeys.SQUARE_ACCESS_TOKEN}
+                            onChange={(e) => setSessionKeys(prev => ({ ...prev, SQUARE_ACCESS_TOKEN: e.target.value }))}
+                            placeholder="sq0atp-..."
+                            className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Square Application ID</label>
+                          <input 
+                            type="text"
+                            value={sessionKeys.VITE_SQUARE_APP_ID}
+                            onChange={(e) => setSessionKeys(prev => ({ ...prev, VITE_SQUARE_APP_ID: e.target.value }))}
+                            placeholder="sandbox-sq0idp-..."
+                            className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Square Location ID</label>
+                          <input 
+                            type="text"
+                            value={sessionKeys.VITE_SQUARE_LOCATION_ID}
+                            onChange={(e) => setSessionKeys(prev => ({ ...prev, VITE_SQUARE_LOCATION_ID: e.target.value }))}
+                            placeholder="L..."
+                            className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          />
+                        </div>
+                        <div className="pt-2">
+                          <p className="text-[10px] text-zinc-400 italic leading-tight">
+                            Status: {envStatus.squareToken ? '✅ Connected' : '❌ Needs Setup'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <div className="h-px bg-zinc-100" />
+
+                {/* 3. Google Maps Section */}
+                <section className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-8 bg-amber-500 rounded-full" />
+                    <h3 className="text-lg font-black italic tracking-tight">3. Google Maps (Reviews & Location)</h3>
+                  </div>
+                  
+                  <div className="p-6 bg-zinc-50 rounded-[2.5rem] border border-zinc-100 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-black text-zinc-900 italic uppercase">Maps API Config</p>
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${envStatus.maps ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
+                        {envStatus.maps ? 'Configured' : 'Missing'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Google Maps API Key</label>
+                        <input 
+                          type="password"
+                          value={sessionKeys.GOOGLE_MAPS_API_KEY}
+                          onChange={(e) => setSessionKeys(prev => ({ ...prev, GOOGLE_MAPS_API_KEY: e.target.value }))}
+                          placeholder="AIza..."
+                          className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Google Place ID</label>
+                        <input 
+                          type="text"
+                          value={sessionKeys.GOOGLE_PLACE_ID}
+                          onChange={(e) => setSessionKeys(prev => ({ ...prev, GOOGLE_PLACE_ID: e.target.value }))}
+                          placeholder="ChIJ..."
+                          className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    
+                    <p className="text-xs text-zinc-500 leading-relaxed italic">
+                      Required for displaying real Google Reviews. You can find your Place ID <a href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder" target="_blank" className="text-blue-500 underline font-bold">here</a>.
+                    </p>
+                  </div>
+                </section>
+
+                {/* 2. Gemini AI Section */}
+                <section className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-8 bg-zinc-900 rounded-full" />
+                    <h3 className="text-lg font-black italic tracking-tight">2. Gemini AI Concierge</h3>
+                  </div>
+                  
+                  <div className="p-6 bg-zinc-900 rounded-[2.5rem] text-white space-y-4 shadow-xl">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold opacity-80 uppercase tracking-widest italic">AI BRAIN CONFIG</p>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${envStatus.gemini ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                        {envStatus.gemini ? 'ACTIVE' : 'OFFLINE'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-zinc-500 block">Gemini API Key</label>
+                      <input 
+                        type="password"
+                        value={sessionKeys.GEMINI_API_KEY}
+                        onChange={(e) => setSessionKeys(prev => ({ ...prev, GEMINI_API_KEY: e.target.value }))}
+                        placeholder="AIza..."
+                        className="w-full p-3 bg-zinc-800 border border-zinc-700 rounded-xl text-[10px] font-mono text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      Powers the Chat Assistant and Vehicle Condition AI. Paste your key above from Google AI Studio.
+                    </p>
+                    
+                    <Button variant="outline" className="w-full h-12 rounded-xl border-zinc-700 text-white hover:bg-zinc-800 font-bold" asChild>
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank">
+                        Get Free Key <ExternalLink className="h-4 w-4 ml-2" />
+                      </a>
+                    </Button>
+                  </div>
+                </section>
+
+                {/* 3. Global Secrets Table */}
+                <section className="space-y-4">
+                   <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    <h3 className="text-sm font-black italic tracking-tight uppercase">Master Secrets Reference</h3>
+                  </div>
+                  <div className="bg-zinc-50 rounded-[1.5rem] overflow-hidden border border-zinc-100">
+                    <table className="w-full text-[10px] text-left">
+                      <thead className="bg-zinc-100 text-zinc-400 font-black uppercase tracking-widest">
+                        <tr>
+                          <th className="px-6 py-3">Variable Name</th>
+                          <th className="px-6 py-3">Source</th>
+                          <th className="px-6 py-3">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100">
+                        <tr>
+                          <td className="px-6 py-4 font-mono text-zinc-600">SQUARE_ACCESS_TOKEN</td>
+                          <td className="px-6 py-4 text-zinc-400">Square App Credentials</td>
+                          <td className="px-6 py-4"><span className={envStatus.squareToken ? 'text-emerald-500' : 'text-red-500'}>{envStatus.squareToken ? '✓' : '✗'}</span></td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 font-mono text-zinc-600">VITE_SQUARE_APP_ID</td>
+                          <td className="px-6 py-4 text-zinc-400">Square App Credentials</td>
+                          <td className="px-6 py-4"><span className={envStatus.squareApp ? 'text-emerald-500' : 'text-red-500'}>{envStatus.squareApp ? '✓' : '✗'}</span></td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 font-mono text-zinc-600">GEMINI_API_KEY</td>
+                          <td className="px-6 py-4 text-zinc-400">Google AI Studio</td>
+                          <td className="px-6 py-4"><span className={envStatus.gemini ? 'text-emerald-500' : 'text-red-500'}>{envStatus.gemini ? '✓' : '✗'}</span></td>
+                        </tr>
+                        <tr>
+                          <td className="px-6 py-4 font-mono text-zinc-600">GOOGLE_MAPS_API_KEY</td>
+                          <td className="px-6 py-4 text-zinc-400">Google Cloud Console</td>
+                          <td className="px-6 py-4"><span className={envStatus.maps ? 'text-emerald-500' : 'text-red-500'}>{envStatus.maps ? '✓' : '✗'}</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+              </div>
+
+              {/* Footer */}
+              <div className="p-8 bg-zinc-50 border-t border-zinc-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-zinc-400 italic">
+                  <ShieldCheck className="h-4 w-4" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Enterprise Grade Encryption</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => {
+                       Object.keys(sessionKeys).forEach(key => localStorage.removeItem(`SESSION_${key}`));
+                       window.location.reload();
+                    }}
+                    className="font-bold text-red-500 hover:bg-red-50"
+                  >
+                    Clear All Overrides
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setIsConfigOpen(false)}
+                    className="font-bold text-zinc-500"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={saveSessionKeys}
+                    className="bg-emerald-500 border-0 text-white px-8 h-12 rounded-xl font-black italic shadow-lg shadow-emerald-200 hover:bg-emerald-600 transition-all"
+                  >
+                    Apply & Sync Live
+                  </Button>
+                </div>
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}
