@@ -31,7 +31,65 @@ export default function Admin() {
   const [cleaning, setCleaning] = useState(false);
   const [status, setStatus] = useState<{ success?: boolean; message?: string } | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [dbServices, setDbServices] = useState<any[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
   
+  useEffect(() => {
+    fetchDbServices();
+  }, []);
+
+  const fetchDbServices = async () => {
+    setIsLoadingServices(true);
+    try {
+      const response = await fetch('/api/admin/services', {
+        headers: getSquareHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDbServices(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch Firestore services:", err);
+    } finally {
+      setIsLoadingServices(false);
+    }
+  };
+
+  const toggleServiceStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/services/${id}`, {
+        method: 'PATCH',
+        headers: {
+          ...getSquareHeaders(),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ active: !currentStatus })
+      });
+      if (response.ok) {
+        fetchDbServices();
+        setStatus({ success: true, message: `Service ${!currentStatus ? 'Activated' : 'Deactivated'}. Syncing with Square...` });
+      }
+    } catch (err) {
+      console.error("Toggle failed:", err);
+    }
+  };
+
+  const deleteService = async (id: string) => {
+    if (!confirm("Are you sure? This will remove the service from both the Master DB and Square Catalog.")) return;
+    try {
+      const response = await fetch(`/api/admin/services/${id}`, {
+        method: 'DELETE',
+        headers: getSquareHeaders()
+      });
+      if (response.ok) {
+        fetchDbServices();
+        setStatus({ success: true, message: "Service deleted and removed from Square." });
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
   // Local state for temporary keys
   const [sessionKeys, setSessionKeys] = useState({
     GEMINI_API_KEY: localStorage.getItem('SESSION_GEMINI_API_KEY') || '',
@@ -227,6 +285,75 @@ export default function Admin() {
                         </div>
                     </div>
                 </div>
+
+                {/* --- NEW: FIRESTORE MASTER SERVICE INVENTORY --- */}
+                <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-hidden mt-8">
+                  <div className="p-8 border-b border-zinc-50 flex justify-between items-center bg-zinc-50">
+                    <div>
+                      <h3 className="text-xl font-black italic tracking-tighter text-zinc-900">Service Inventory Master</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Master Data Source (Firestore)</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                       <Button variant="outline" size="sm" onClick={fetchDbServices} className="rounded-xl h-8 text-[10px] uppercase font-black tracking-widest">
+                         <RefreshCw className={`h-3 w-3 mr-2 ${isLoadingServices ? 'animate-spin' : ''}`} />
+                         Refresh
+                       </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-0">
+                    {dbServices.length === 0 && !isLoadingServices ? (
+                      <div className="p-12 text-center">
+                        <div className="w-16 h-16 rounded-full bg-zinc-50 flex items-center justify-center mx-auto mb-4">
+                          <Zap className="h-8 w-8 text-zinc-200" />
+                        </div>
+                        <p className="text-sm font-black text-zinc-400 italic">No master services found in Firestore.</p>
+                        <p className="text-[10px] text-zinc-400 mt-2 uppercase tracking-widest">Run "Push Updates to Square" to seed the database.</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-zinc-50">
+                        {dbServices.map((svc) => (
+                          <div key={svc.id} className="p-6 flex items-center justify-between hover:bg-zinc-50/50 transition-colors">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-3 h-3 rounded-full ${svc.active !== false ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-red-500'}`} />
+                              <div>
+                                <h4 className="text-sm font-black text-zinc-900">{svc.name}</h4>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="text-[9px] font-black uppercase text-zinc-400 tracking-tighter">Square ID:</span>
+                                  <span className="text-[9px] font-mono text-zinc-500">{svc.squareId || 'Not Synced'}</span>
+                                  {svc.syncStatus === 'synced' && (
+                                    <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase">Live</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant={svc.active !== false ? "outline" : "default"} 
+                                size="sm" 
+                                onClick={() => toggleServiceStatus(svc.id, svc.active !== false)}
+                                className={`rounded-xl h-9 text-[10px] font-black uppercase tracking-widest ${
+                                  svc.active !== false ? 'border-red-100 text-red-600 hover:bg-red-50' : 'bg-emerald-500 text-zinc-950'
+                                }`}
+                              >
+                                {svc.active !== false ? 'Deactivate' : 'Activate'}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => deleteService(svc.id)}
+                                className="rounded-xl h-9 w-9 p-0 text-zinc-300 hover:text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
             </div>
 
             {/* 2. Management Controls */}
@@ -361,58 +488,66 @@ export default function Admin() {
                         <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-zinc-950 shadow-lg shadow-emerald-100">
                             <ShieldCheck className="h-5 w-5" />
                         </div>
-                        <h2 className="text-xl font-black italic tracking-tight">Catalog Controls</h2>
+                        <h2 className="text-xl font-black italic tracking-tight">Square Master</h2>
                     </div>
 
                     <div className="space-y-6">
-                        <div className="space-y-4">
+                        <div className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-100 space-y-4">
+                            <div className="flex items-center justify-between">
+                               <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Business Logic Source</p>
+                               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase">Active</span>
+                            </div>
+                            <h4 className="text-2xl font-black italic tracking-tighter text-zinc-900 leading-none">All Services Managed via Square Catalog.</h4>
                             <p className="text-xs text-zinc-500 font-medium leading-relaxed">
-                                <strong>Safety Sync:</strong> Scans Square for new services. Adds missing items with pre-calculated durations, but <span className="text-emerald-600 font-bold">never overwrites</span> your manual settings for existing items.
+                                Pricing, availability, and bookings are now pulled directly from your Square account. Changes made in the Square Dashboard reflect on the site instantly.
                             </p>
-                            <Button 
-                                onClick={handleSync} 
-                                className="w-full h-14 rounded-2xl bg-zinc-900 font-black italic shadow-lg shadow-zinc-200"
-                                disabled={syncing || cleaning}
-                            >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                              <Button 
+                                onClick={handleSync}
+                                className="h-12 rounded-2xl bg-zinc-950 text-white font-black italic shadow-lg shadow-zinc-200"
+                                disabled={syncing}
+                              >
                                 {syncing ? (
-                                    <>
-                                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                                        Scanning & Adding...
-                                    </>
+                                  <>
+                                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                    Updating...
+                                  </>
                                 ) : (
-                                    <>
-                                        <RefreshCw className="mr-2 h-4 w-4" />
-                                        Sync Missing Only
-                                    </>
+                                  <>
+                                    <RefreshCw className="mr-2 h-4 w-4" />
+                                    Push Updates to Square
+                                  </>
                                 )}
-                            </Button>
+                              </Button>
+                              <Button variant="outline" className="h-12 rounded-2xl border-zinc-200 font-black italic" asChild>
+                                <a href="https://squareup.com/dashboard/items/library" target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="mr-2 h-4 w-4 text-emerald-500" />
+                                  Open Square
+                                </a>
+                              </Button>
+                            </div>
                         </div>
 
-                        <div className="pt-6 border-t border-zinc-50">
-                            <p className="text-xs text-zinc-500 font-medium mb-3 leading-relaxed italic">
-                                <strong>Deep Clean:</strong> Merges duplicate items in your catalog and removes redundant variations. Use this if you see multiple sets of the same service.
-                            </p>
-                             <Button 
+                        <div className="pt-6 border-t border-zinc-50 space-y-4">
+                             <h5 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 px-1">Integrity Tools</h5>
+                              <Button 
                                 variant="outline"
                                 onClick={handleCleanup} 
-                                className="w-full h-14 rounded-2xl text-red-600 border-red-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 font-black italic"
-                                disabled={syncing || cleaning}
+                                className="w-full h-14 rounded-2xl text-zinc-600 border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300 font-black italic"
+                                disabled={cleaning}
                             >
                                 {cleaning ? (
                                     <>
                                         <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                                        Merging Duplicates...
+                                        Analyzing Catalog...
                                     </>
                                 ) : (
                                     <>
                                         <Trash2 className="mr-2 h-4 w-4" />
-                                        Nuclear Cleanup & Merge
+                                        Cleanup Duplicate Items
                                     </>
                                 )}
                             </Button>
-                            <p className="text-[10px] text-zinc-400 mt-2 text-center uppercase tracking-widest leading-tight px-4 font-bold">
-                                ⚠️ merging cannot be undone
-                            </p>
                         </div>
 
                         {status && (

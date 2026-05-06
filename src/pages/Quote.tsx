@@ -17,6 +17,7 @@ export default function Quote() {
 
   // Core Quote State
   const [vehicleSize, setVehicleSize] = useState<VehicleSize | ''>('');
+  const [vehicleYear, setVehicleYear] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
   const [condition, setCondition] = useState<string>('good');
@@ -56,7 +57,15 @@ export default function Quote() {
     selectedServices.forEach(id => {
       const service = SERVICES.find(s => s.id === id);
       if (service) {
-        base += (service.price as any)[vehicleSize] || 0;
+        let servicePrice = (service.price as any)[vehicleSize] || Object.values(service.price)[0] || 0;
+        
+        // Handle variable pricing (e.g. per foot)
+        if (service.pricingType === 'variable') {
+           // Default to 25ft for RV/Boat estimates if not specified
+           servicePrice = servicePrice * 25;
+        }
+        
+        base += servicePrice;
       }
     });
 
@@ -128,6 +137,7 @@ export default function Quote() {
             condition,
             expectation,
             vehicleSize,
+            vehicleYear,
             anchor
           }
         })
@@ -139,6 +149,7 @@ export default function Quote() {
     formData.append('phone', contactInfo.phone);
     formData.append('email', contactInfo.email);
     formData.append('vehicleSize', vehicleSize);
+    formData.append('vehicleYear', vehicleYear);
     formData.append('condition', condition);
     formData.append('expectation', expectation);
     formData.append('services', JSON.stringify(selectedServices));
@@ -166,6 +177,7 @@ export default function Quote() {
             phone: contactInfo.phone,
             vehicle: {
               size: vehicleSize,
+              year: vehicleYear,
               condition: condition
             },
             services: selectedServices,
@@ -364,6 +376,22 @@ export default function Quote() {
                         
                         <div className="space-y-8">
                             <div className="space-y-4">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1 italic">Vitals</label>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 pl-2">Vehicle Year</label>
+                                        <input 
+                                            type="number" 
+                                            placeholder="e.g. 2024"
+                                            value={vehicleYear}
+                                            onChange={(e) => setVehicleYear(e.target.value)}
+                                            className="w-full p-4 rounded-xl bg-zinc-50 border-2 border-zinc-50 focus:bg-white focus:border-zinc-900 outline-none transition-all font-bold text-lg" 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 pl-1 italic">1. Dimension Profile</label>
                                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                                 {[...VEHICLE_SIZES, ...SPECIALTY_SIZES].map(size => (
@@ -450,7 +478,10 @@ export default function Quote() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {SERVICES.filter(s => s.highlight || ['full-detailing', 'paint-correction', 'specialty-services'].includes(s.categoryId)).map(service => (
+                           {SERVICES.filter(s => 
+                             s.highlight || 
+                             ['full-detailing', 'paint-correction', 'rv-boat-detailing', 'tractor-detailing'].includes(s.categoryId)
+                           ).map(service => (
                                 <button
                                     key={service.id}
                                     onClick={() => toggleService(service.id)}
@@ -467,12 +498,13 @@ export default function Quote() {
                                         </div>
                                         {selectedServices.includes(service.id) && <div className="p-1 bg-emerald-500 rounded-full"><CheckCircle2 className="h-4 w-4 text-zinc-950" /></div>}
                                     </div>
-                                    <p className={`text-xs leading-relaxed mb-6 ${selectedServices.includes(service.id) ? 'text-zinc-400' : 'text-zinc-500'}`}>{service.description}</p>
+                                    <p className={`text-xs leading-relaxed mb-6 ${selectedServices.includes(service.id) ? 'text-zinc-400' : 'text-zinc-500'}`}>{service.shortDescription}</p>
                                     <div className="flex items-center justify-between mt-auto">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Starting at</span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{service.pricingType === 'variable' ? 'Starting at' : 'Investment'}</span>
                                             <span className={`text-2xl font-black ${selectedServices.includes(service.id) ? 'text-white' : 'text-zinc-900'}`}>
                                                 ${(service.price as any)[vehicleSize || 'car']}
+                                                {service.pricingType === 'variable' && <span className="text-xs ml-1">/ft</span>}
                                             </span>
                                         </div>
                                     </div>

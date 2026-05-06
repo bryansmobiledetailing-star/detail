@@ -9,9 +9,9 @@ export default function Membership() {
     <div className="min-h-screen bg-zinc-50 py-16">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16 space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900">Maintenance Plans</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900">Maintenance Detailing</h1>
           <p className="text-lg text-zinc-600">
-            Keep your vehicle in showroom condition year-round. Our membership plans offer priority booking, discounted add-ons, and consistent protection.
+            Keep your vehicle in showroom condition year-round. Our maintenance plans offer priority booking, discounted add-ons, and consistent protection.
           </p>
         </div>
 
@@ -41,10 +41,10 @@ export default function Membership() {
 
             <div className="space-y-4 mb-8 flex-grow">
               {[
-                "1 Essential Full Detail / mo",
+                "1 Maintenance Detail / mo",
                 "Priority Scheduling",
                 "10% Off All Add-ons",
-                "Priority Scheduling Slot"
+                "Text Reminder Concierge"
               ].map((feature, i) => (
                 <div key={i} className="flex items-center gap-3 text-sm text-zinc-700">
                   <CheckCircle2 className="h-4 w-4 text-zinc-900" />
@@ -86,7 +86,7 @@ export default function Membership() {
 
             <div className="space-y-4 mb-8 flex-grow">
               {[
-                "2 Essential Details / mo (Bi-Weekly)",
+                "2 Maintenance Details / mo (Bi-Weekly)",
                 "Concierge Scheduling",
                 "25% Off All Add-ons",
                 "Complimentary Engine Detail",
@@ -128,7 +128,7 @@ export default function Membership() {
 
             <div className="space-y-4 mb-8 flex-grow">
               {[
-                "1 Signature Detail / Quarter",
+                "1 Full Detail Refresh / Quarter",
                 "Seasonal Sealant Refresh",
                 "15% Off All Add-ons",
                 "Premium Protection Plan"
@@ -153,7 +153,7 @@ export default function Membership() {
             <h3 className="text-xl font-bold text-zinc-900">Membership Requirements</h3>
           </div>
           <p className="text-zinc-600 mb-4">
-            To qualify for our maintenance plans, your vehicle must first undergo a Signature Full Detail or higher to establish a baseline of cleanliness and protection.
+            To qualify for our maintenance plans, your vehicle must first undergo a Full Detail Package or higher to establish a baseline of cleanliness and protection.
           </p>
           <p className="text-zinc-600">
             Memberships are billed automatically to your card on file via Square Payments. You can cancel or pause your membership at any time with 7 days notice before your next billing cycle.

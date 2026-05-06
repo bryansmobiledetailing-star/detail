@@ -1,11 +1,18 @@
-export type VehicleSize = 'car' | 'suv' | 'truck' | 'largeSuv';
+export type VehicleSize = 'car' | 'suv' | 'truck' | 'largeSuv' | 'rv' | 'tractor';
 
 export interface Service {
   id: string;
   categoryId: string;
   name: string;
-  description: string;
+  shortDescription: string;
+  longDescription: string;
   price: Record<string, number>;
+  pricingType: 'fixed' | 'custom' | 'variable';
+  squareName: string;
+  seo: {
+    title: string;
+    description: string;
+  };
   features: string[];
   duration: string | Record<string, string>;
   badge?: string | null;
@@ -13,68 +20,64 @@ export interface Service {
   image?: string;
   isSpecialty?: boolean;
   bestFor?: string;
-  considerAlternative?: {
-    text: string;
-    targetServiceId: string;
-  };
 }
 
 export const CATEGORIES = [
   { 
-    id: 'full-detailing', 
-    slug: 'full-detailing',
-    name: 'Full Detailing', 
-    description: 'Complete interior and exterior packages to restore your vehicle to showroom condition.',
-    image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=1200'
-  },
-  { 
-    id: 'interior-only', 
-    slug: 'interior-only',
-    name: 'Interior Services', 
-    description: 'Deep cleaning, sanitization, and restoration of your vehicle\'s cabin.',
+    id: 'interior-detailing', 
+    slug: 'interior-detailing',
+    name: 'Interior Detailing', 
+    description: 'If your interior is starting to look worn, dusty, or stained, this is where I bring it back. My interior detailing focus is on cleaning, restoring, and refreshing every surface.',
     image: 'https://images.unsplash.com/photo-1582139329536-e7228392ef23?auto=format&fit=crop&q=80&w=1200'
   },
   { 
-    id: 'exterior-only', 
-    slug: 'exterior-only',
-    name: 'Exterior Services', 
-    description: 'Professional hand washing and premium paint protection for a lasting shine.',
+    id: 'exterior-detailing', 
+    slug: 'exterior-detailing',
+    name: 'Exterior Detailing', 
+    description: 'Remove road grime and contamination that dulls your finish. My exterior detailing service restores gloss while adding protection to keep it looking better longer.',
     image: 'https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200'
+  },
+  { 
+    id: 'full-detailing', 
+    slug: 'full-detailing',
+    name: 'Full Detailing Packages', 
+    description: 'The best place to start. Combined interior and exterior work into one complete service to get your vehicle back to showroom condition.',
+    image: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&q=80&w=1200'
   },
   { 
     id: 'paint-correction', 
     slug: 'paint-correction',
     name: 'Paint Correction', 
-    description: 'Removing micro-scratches and swirls to restore depth and clarity to your paint.',
+    description: 'Fix swirl marks, scratches, and restore clarity to your clear coat. Precision machine polishing for real improvement, not temporary shine.',
     image: 'https://images.unsplash.com/photo-1507136566006-bb91e5088c97?auto=format&fit=crop&q=80&w=1200'
   },
   { 
-    id: 'ceramic-coating', 
+    id: 'protection', 
     slug: 'ceramic-coating',
     name: 'Ceramic Coating', 
-    description: 'The ultimate long-term protection, durability, and extreme gloss.',
+    description: 'The ultimate protection. Creates a durable layer over your paint that resists dirt, water, and environmental damage while keeping a high-gloss finish.',
     image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200'
   },
   { 
-    id: 'specialty-services', 
-    slug: 'rv-motorhome',
-    name: 'Specialty Services', 
-    description: 'RVs, boats, and large scale cleaning for specialty vehicles.',
-    image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&q=80&w=1200'
-  },
-  { 
     id: 'maintenance', 
-    slug: 'maintenance',
-    name: 'Maintenance', 
-    description: 'Quick upkeep washes for established clients. Hand-wash only; not for tunnel washes.',
-    image: 'https://images.unsplash.com/photo-1605164599901-f89ff17963d0?auto=format&fit=crop&q=80&w=1200'
+    slug: 'maintenance-plans',
+    name: 'Maintenance Detailing', 
+    description: 'Stay ahead of the mess. Consistent upkeep detailing designed for vehicles that have already had a full reset.',
+    image: 'https://images.unsplash.com/photo-1620055375841-7667ff4a193b?auto=format&fit=crop&q=80&w=1200'
   },
   {
-    id: 'add-ons',
-    slug: 'add-ons',
-    name: 'Add-ons',
-    description: 'Supplemental services to enhance your detailing package.',
-    image: 'https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200'
+    id: 'rv-boat-detailing',
+    slug: 'rv-boat-detailing',
+    name: 'RV, Boat & Equipment Detailing',
+    description: 'Specialized detailing for larger vehicles. From oxidation removal to full cleanups, we handle the big stuff that needs more than a basic wash.',
+    image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&q=80&w=1200'
+  },
+  {
+    id: 'tractor-detailing',
+    slug: 'tractor-farm-equipment',
+    name: 'Tractor & Farm Equipment',
+    description: 'Professional cleaning and restoration for tractors and farm machinery. We remove heavy building and grease to keep your equipment looking better and lasting longer.',
+    image: 'https://images.unsplash.com/photo-1594913785162-e678ac052429?auto=format&fit=crop&q=80&w=1200'
   }
 ];
 
@@ -86,243 +89,283 @@ export const VEHICLE_SIZES = [
 ];
 
 export const SPECIALTY_SIZES = [
-  { id: 'rv', name: 'RV / Motorhome / Boat', icon: '🏠' },
+  { id: 'rv', name: 'RV / Boat / Trailer', icon: '🏠' },
+  { id: 'tractor', name: 'Tractor / Equipment', icon: '🚜' },
 ];
 
 export const ADD_ONS = [
-  { id: 'pet-hair', name: 'Pet Hair Extraction', price: 40, duration: '45-60 mins', description: 'Deep removal of pet hair from carpets, seats, and crevices.' },
+  { id: 'pet-hair', name: 'Pet Hair Removal', price: 40, duration: '45-60 mins', description: 'Deep removal of pet hair from carpets, seats, and crevices.' },
   { id: 'seat-shampoo', name: 'Shampoo & Extraction', price: 60, duration: '60 mins', description: 'Hot water extraction and stain lifting for all cloth upholstery.' },
   { id: 'smoke-odor', name: 'Odor Neutralizer (Ozone)', price: 100, duration: '3.5 hours', description: 'Ozone treatment to eliminate smoke, mold, and biological odors.' },
-  { id: 'leather-condition', name: 'Leather Deep Condition', price: 50, duration: '30 mins', description: 'pH-balanced cleaning and conditioning to restore leather suppleness.' },
   { id: 'engine-bay', name: 'Engine Bay Detail', price: 50, duration: '45 mins', description: 'Safe degreasing, steam cleaning, and dressing of the engine compartment.' },
   { id: 'headlight', name: 'Headlight Restoration', price: 80, duration: '60 mins', description: 'Multi-stage sanding and polishing to restore clarity and UV protection.' },
-  { id: 'clay-bar-addon', name: 'Clay Bar Treatment', price: 40, duration: '45 mins', description: 'Mechanical decontamination for a smooth-as-glass paint finish.' },
-  { id: 'trim-restore', name: 'Plastic Trim Restore', price: 50, duration: '45 mins', description: 'UV-resistant restoration for faded exterior plastic trim.' },
 ];
 
 export const SERVICES: Service[] = [
-  // FULL DETAILING
+  // --- INTERIOR ---
   {
-    id: 'essential-full',
-    categoryId: 'full-detailing',
-    name: 'Full Detail (Level 1: Essential)',
-    description: 'A thorough seasonal refresh. Includes a premium exterior hand wash and 6-month protection paired with a Level 1 interior cleaning and touchpoint sanitization.',
-    price: { car: 249, suv: 299, truck: 329, largeSuv: 349 },
-    features: ['Premium Hand Wash & Dry', '6-Month Protective Paint Sealant', 'Level 1 Interior Refresh', 'Door Jamb Detail', 'Tire & Trim Protection'],
-    duration: { car: '4-4.5 hours', suv: '4.5-5 hours', truck: '5-5.5 hours', largeSuv: '5.5-6 hours' },
-    badge: 'Standard',
-    bestFor: 'Daily drivers needing a thorough reset and protection for the next 6 months.',
-    considerAlternative: {
-      text: 'If you have heavy pet hair or deep stains, go for the Level 2 or Level 3 packages.',
-      targetServiceId: 'advanced-full'
-    }
+    id: 'interior-detail',
+    categoryId: 'interior-detailing',
+    name: 'Interior Detail',
+    shortDescription: 'Full interior cleaning for normal use vehicles. Removes buildup, light stains, and restores a clean, fresh feel.',
+    longDescription: 'Restore your interior to a clean, comfortable condition. From light cleanup to full resets, I handle everything from everyday buildup to heavy staining and pet hair.',
+    price: { car: 179, suv: 199, truck: 219, largeSuv: 249 },
+    pricingType: 'fixed',
+    squareName: 'Interior Detail',
+    seo: {
+      title: 'Interior Car Detailing Bellevue NE | Omaha Interior Cleaning',
+      description: 'Professional interior detailing in Bellevue, NE. Deep cleaning and refreshing for your vehicle interior. Serving Omaha, Papillion, and La Vista.'
+    },
+    features: ['Deep Vacuum & Crevice Clean', 'Steam Sanitization of Hard Surfaces', 'Upholstery Scrub & Light Spot Treat', 'Leather Cleaning & Conditioning', 'Anti-Static Dust Protection'],
+    duration: '3-4 hours',
+    bestFor: 'Daily drivers needing a thorough refresh.',
+    image: 'https://images.unsplash.com/photo-1582139329536-e7228392ef23?auto=format&fit=crop&q=80&w=1200'
   },
   {
-    id: 'advanced-full',
-    categoryId: 'full-detailing',
-    name: 'Full Detail (Level 2: Advanced Reset)',
-    description: 'A comprehensive restoration for vehicles needing more than a refresh. Includes iron decontamination, machine polish enhancement, and deep interior cleaning.',
-    price: { car: 349, suv: 399, truck: 429, largeSuv: 449 },
-    features: ['Premium Hand Wash', 'Iron Decontamination', '6-Month Machine Liquid Wax', 'Level 1 Interior Detail', 'Light Carpet Shampoo'],
-    duration: { car: '5-5.5 hours', suv: '5.5-6 hours', truck: '6-6.5 hours', largeSuv: '6.5-7 hours' },
-    badge: 'Recommended',
-    bestFor: 'Vehicles with light environmental fallout and interior surfaces needing more than a light dust.',
-    considerAlternative: {
-      text: 'For heavy stains and 12-month ceramic protection, step up to Level 3.',
-      targetServiceId: 'showroom-full'
-    }
+    id: 'interior-reset',
+    categoryId: 'interior-detailing',
+    name: 'Interior Reset',
+    shortDescription: 'Deep interior restoration for heavy dirt, stains, and pet hair. Designed for neglected or heavily used vehicles.',
+    longDescription: 'When the interior needs more than a standard detail, the Interior Reset is the solution. I focus on heavy stain removal, deep carpet extraction, and intensive cleaning of all surfaces to bring a dirty interior back to life.',
+    price: { car: 249, suv: 279, truck: 309, largeSuv: 349 },
+    pricingType: 'fixed',
+    squareName: 'Interior Reset',
+    seo: {
+      title: 'Deep Interior Car Cleaning Bellevue NE | Heavy Stain & Pet Hair Removal',
+      description: 'Intensive interior restoration in Bellevue. We handle heavy stains, pet hair, and neglected interiors across the Omaha area.'
+    },
+    features: ['Hot Water Upholstery Extraction', 'Heavy Stain Removal Treatment', 'Deep Pet Hair Extraction', 'Intensive Steam Cleaning', 'Odor Neutralization'],
+    duration: '5-7 hours',
+    bestFor: 'Neglected vehicles, pets, or high-mileage interiors.',
+    badge: 'Deep Restoration'
   },
+
+  // --- EXTERIOR ---
   {
-    id: 'showroom-full',
-    categoryId: 'full-detailing',
-    name: 'Full Detail (Level 3: Showroom Restore)',
-    description: 'Our flagship "Total Reset". Includes a technical exterior hand wash, engine bay detail, clay bar decontamination, and 12-month ceramic protection, paired with a deep-restore interior sanitization.',
-    price: { car: 449, suv: 499, truck: 549, largeSuv: 599 },
-    features: ['Technical Exterior Hand Wash', 'Engine Bay Detail & Dressing', 'Clay Bar Decontamination', '12-Month Ceramic Paint Guard', 'Level 2 Interior Deep-Restore'],
-    duration: { car: '6-7 hours', suv: '7-8 hours', truck: '8-9 hours', largeSuv: '9-10 hours' },
-    badge: 'Pro Choice',
+    id: 'exterior-enhancement',
+    categoryId: 'exterior-detailing',
+    name: 'Exterior Enhancement',
+    shortDescription: 'Decontaminates paint, restores gloss, and adds protection. Best option beyond a basic wash.',
+    longDescription: 'More than a wash. This removes contamination, restores gloss, and adds protection so your paint looks better and stays cleaner longer.',
+    price: { car: 120, suv: 140, truck: 160, largeSuv: 180 },
+    pricingType: 'fixed',
+    squareName: 'Exterior Enhancement',
+    seo: {
+      title: 'Exterior Detailing Bellevue NE | Gloss Restoration Omaha Area',
+      description: 'Exterior enhancement detail in Bellevue. Remove contaminants, restore gloss, and protect your paint. Serving the greater Omaha area.'
+    },
+    features: ['Technical pH-neutral Hand Wash', 'Iron Decontamination', 'Clay Bar Treatment', '6-Month Ceramic Sealant', 'Wheel Barrel & Tire Detail'],
+    duration: '2-3 hours',
+    bestFor: 'Vehicles needing a smooth finish and protection.',
+    badge: 'Best-Seller',
     highlight: true,
-    image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=1200',
-    bestFor: 'Vehicles that have been neglected for 6+ months or are being prepared for sale.',
-    considerAlternative: {
-      text: 'If your car is already in good condition, consider the Level 1 Essential.',
-      targetServiceId: 'essential-full'
-    }
+    image: 'https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200'
+  },
+  {
+    id: 'paint-enhancement-polish',
+    categoryId: 'exterior-detailing',
+    name: 'Paint Enhancement Polish',
+    shortDescription: 'Removes light swirls and improves gloss so your paint looks noticeably better.',
+    longDescription: 'This service includes a machine polish enhancement to remove very light swirl marks and significantly boost the depth and clarity of your paint. It’s the perfect middle ground between a wash and full correction.',
+    price: { car: 249, suv: 289, truck: 329, largeSuv: 369 },
+    pricingType: 'fixed',
+    squareName: 'Paint Enhancement Polish',
+    seo: {
+      title: 'Paint Enhancement Bellevue NE | Machine Polishing Omaha Area',
+      description: 'Machine polish enhancement in Bellevue. Remove light swirls and boost paint gloss for a showroom look across Omaha.'
+    },
+    features: ['All Exterior Enhancement Features', 'Machine Polish Enhancement', 'Light Swirl Removal', 'Enhanced Gloss & Clarity', 'Sealant Upgrade'],
+    duration: '4-6 hours',
+    bestFor: 'Improving paint appearance without full correction.'
   },
 
-  // NEW CAR
-  {
-    id: 'new-car-prep',
-    categoryId: 'full-detailing',
-    name: 'New Car Protection Package',
-    description: 'Specifically for vehicles under 3,000 miles. Technical wash, mechanical decontamination, and precision protection for all surfaces.',
-    price: { car: 350, suv: 400, truck: 450, largeSuv: 500 },
-    features: ['Technical Hand Wash', 'Exo-Decontamination', 'Ceramic Paint Sealant', 'Interior UV Shield'],
-    duration: { car: '4-5 hours', suv: '5-6 hours', truck: '6-7 hours', largeSuv: '7-8 hours' },
-    badge: 'New Vehicles',
-    bestFor: 'Freshly delivered vehicles that need a foundational layer of protection.',
-  },
-
-  // INTERIOR
-  {
-    id: 'essential-interior',
-    categoryId: 'interior-only',
-    name: 'Interior Detail (Level 1: Refresh)',
-    description: 'Thorough cleaning for well-maintained vehicles. Focuses on dust removal, glass clarity, and sanitizing touchpoints for a healthy driving environment.',
-    price: { car: 179, suv: 199, truck: 209, largeSuv: 229 },
-    features: ['Full Interior Vacuum', 'Surface Sanitization', 'Glass Polishing', 'Crevice Blowout', 'Deodorizing Treatment'],
-    duration: { car: '2-2.5 hours', suv: '2.5-3 hours', truck: '3-3.5 hours', largeSuv: '3.5-4 hours' },
-    badge: 'Most Popular',
-    bestFor: 'Vehicles that are cleaned regularly but need a professional, deep finish.',
-    considerAlternative: {
-      text: 'If you have any stains or leather needing care, the Level 2 Deep Restore is better.',
-      targetServiceId: 'signature-interior'
-    }
-  },
-  {
-    id: 'signature-interior',
-    categoryId: 'interior-only',
-    name: 'Interior Detail (Level 2: Deep Restore)',
-    description: 'Complete cabin restoration. Includes high-temp steam sanitization, professional hot water carpet extraction, and premium conditioning for all leather and vinyl.',
-    price: { car: 299, suv: 339, truck: 359, largeSuv: 389 },
-    features: ['Deep Carpet & Mat Extraction', 'High-Temp Steam Sanitization', 'Leather/Vinyl Conditioning', 'Stain Lifting & Removal', 'UV Protection Coating'],
-    duration: { car: '4-5 hours', suv: '5-6 hours', truck: '6-7 hours', largeSuv: '7-8 hours' },
-    badge: 'Top Choice',
-    highlight: true,
-    bestFor: 'Restoring interiors with moderate stains, odors, or leather needing nutrition.',
-    considerAlternative: {
-      text: 'For heavily neglected interiors or bio-hazards, use the Level 3 Restoration.',
-      targetServiceId: 'interior-restoration'
-    }
-  },
-  {
-    id: 'interior-restoration',
-    categoryId: 'interior-only',
-    name: 'Interior Detail (Level 3: Deep Restoration)',
-    description: 'For heavily neglected interiors with mold, smoke, or severe pet hair. Industrial-grade techniques used to restore cabins that standard detailing cannot.',
-    price: { car: 350, suv: 400, truck: 450, largeSuv: 500 },
-    features: ['Mold/Bio Remediation', 'Smoke Odor Removal', 'Industrial Extraction', 'Severe Stain Treatment', 'Ozone Sterilization'],
-    duration: { car: '8-10 hours', suv: '10-12 hours', truck: '12-14 hours', largeSuv: '14-16 hours' },
-    badge: 'Heavy Duty',
-    highlight: false,
-    bestFor: 'Vehicles with severe biological issues, heavy smoke odor, or extreme neglect.',
-  },
-
-  // EXTERIOR
-  {
-    id: 'exterior-protection',
-    categoryId: 'exterior-only',
-    name: 'Exterior Detail (Level 1: Protect & Guard)',
-    description: 'Professional decontamination and protection. Removes road grime and fallout, finishing with a machine-applied 12-month ceramic sealant.',
-    price: { car: 140, suv: 160, truck: 170, largeSuv: 190 },
-    features: ['Iron Decontamination', 'Clay Bar Treatment', '12-Month Ceramic Sealant', 'Wheel Barrel Clean', 'Trim UV Guard'],
-    duration: { car: '3-3.5 hours', suv: '3.5-4 hours', truck: '4-4.5 hours', largeSuv: '4.5-5 hours' },
-    bestFor: 'Paint that feels rough to the touch or hasn\'t been protected in 6+ months.',
-  },
-  {
-    id: 'maintenance-wash',
-    categoryId: 'maintenance',
-    name: 'Maintenance Wash (Bi-Weekly)',
-    description: 'Exclusive to established clients. A gentle hand-wash and interior refresh to maintain the longevity of your existing coatings and sealants.',
-    price: { car: 60, suv: 70, truck: 75, largeSuv: 80 },
-    features: ['pH Neutral Hand Wash', 'Interior Vacuum', 'Tire Dressing', 'Sealant Topper'],
-    duration: { car: '1-1.3 hours', suv: '1.3-1.5 hours', truck: '1.5-1.8 hours', largeSuv: '1.8-2 hours' },
-    bestFor: 'Clients who have received a Full or Ceramic detail in the last 30 days.',
-  },
-
-  // PAINT CORRECTION
-  {
-    id: 'paint-enhancement',
-    categoryId: 'paint-correction',
-    name: 'Paint Correction (Level 1: Gloss Enhancement)',
-    description: 'A single-stage machine polish to maximize reflection and remove light haze. Best for newer cars seeking a high-gloss finish.',
-    price: { car: 200, suv: 250, truck: 275, largeSuv: 300 },
-    features: ['Single-stage Machine Polish', 'Haze Removal', 'Gloss Maximization'],
-    duration: { car: '4-5 hours', suv: '5-6 hours', truck: '6-7 hours', largeSuv: '7-8 hours' },
-    bestFor: 'Maximizing shine on newer paint or before applying a high-end sealant.',
-  },
+  // --- PAINT CORRECTION ---
   {
     id: 'paint-correction-l1',
     categoryId: 'paint-correction',
-    name: 'Paint Correction (Level 2: Stage 1)',
-    description: 'Removes 60-80% of swirls and light scratches. Drastically improves color depth, clarity, and mirror-reflexion.',
-    price: { car: 300, suv: 350, truck: 375, largeSuv: 400 },
-    features: ['60-80% Swirl Removal', 'Leveling Compound', 'Mirror Finish'],
-    duration: { car: '6-7 hours', suv: '7-8 hours', truck: '8-9 hours', largeSuv: '9-10 hours' },
-    bestFor: 'Paint with visible swirl marks from tunnel washes or improper toweling.',
-    considerAlternative: {
-      text: 'For deep scratches or total restoration, go for Level 3.',
-      targetServiceId: 'paint-correction-l2'
-    }
+    name: 'Paint Correction (Level 1)',
+    shortDescription: 'Light improvement. Removes minor haze and light swirl marks.',
+    longDescription: 'Focused on real improvement, this single-stage correction removes light defects and restores clarity to the clear coat. Ideal for newer vehicles or those with minor wear.',
+    price: { car: 350, suv: 400, truck: 450, largeSuv: 500 },
+    pricingType: 'custom',
+    squareName: 'Paint Correction (Level 1)',
+    seo: {
+      title: 'Single-Stage Paint Correction Bellevue NE | Omaha Paint Polishing',
+      description: 'Professional Level 1 paint correction in Bellevue and Omaha. Restore paint clarity and remove minor imperfections.'
+    },
+    features: ['Single-Stage Machine Correction', 'Surface Decontamination', 'Gloss Restoration', 'Wipeout Inspection', 'Paint Depth Assessment'],
+    duration: '6-8 hours',
+    bestFor: 'Newer vehicles or well-maintained paint.'
   },
   {
     id: 'paint-correction-l2',
     categoryId: 'paint-correction',
-    name: 'Paint Correction (Level 3: Stage 2)',
-    description: 'Multi-stage compounding and refining polish. Designed for vehicles with heavy swirling or scratches needing a total paint overhaul.',
-    price: { car: 500, suv: 550, truck: 600, largeSuv: 650 },
-    features: ['Heavy Defect Removal', 'compounding & Refining', 'Precision Buffing'],
-    duration: { car: '12-14 hours', suv: '14-16 hours', truck: '16-18 hours', largeSuv: '18-20 hours' },
-    bestFor: 'Older vehicles or paint with heavy oxidization and deep scratching.',
+    name: 'Paint Correction (Level 2)',
+    shortDescription: 'Moderate correction. Removes the majority of swirl marks and light scratches.',
+    longDescription: 'A two-stage correction process that first uses a compound to pull out defects, followed by a finishing polish to refine the surface. This addresses moderate swirl marks and deeper imperfections.',
+    price: { car: 550, suv: 650, truck: 750, largeSuv: 850 },
+    pricingType: 'custom',
+    squareName: 'Paint Correction (Level 2)',
+    seo: {
+      title: 'Two-Stage Paint Correction Bellevue NE | Swirl Removal Omaha',
+      description: 'Stage 2 paint correction in Bellevue. Removes the majority of swirls and scratches to restore depth.'
+    },
+    features: ['Two-Stage Compounding & Polishing', 'Intensive Defect Removal', 'High-Clarity Finishing', 'Prep for Ceramic Coating', 'Detailed Surface Inspection'],
+    duration: '1-2 Days',
+    bestFor: 'Older vehicles or paint with visible swirl marks.',
+    highlight: true
   },
 
-  // CERAMIC
+  // --- CERAMIC COATING ---
   {
     id: 'ceramic-3yr',
-    categoryId: 'ceramic-coating',
+    categoryId: 'protection',
     name: '3-Year Ceramic Coating',
-    description: 'Professional-grade durable protection. Extreme hydrophobicity and UV resistance. Makes maintenance washing effortless.',
-    price: { car: 800, suv: 900, truck: 950, largeSuv: 1000 },
-    features: ['3-Year Rated Coating', 'Extreme Water Beading', 'Prep Polish Included'],
-    duration: { car: '1 Day', suv: '1 Day', truck: '1.5 Days', largeSuv: '1.5 Days' },
-    badge: '3 Year',
-    bestFor: 'Long-term protection for most daily drivers with regular maintenance.',
+    shortDescription: '3-year protection. Makes maintenance easier and keeps paint glossy.',
+    longDescription: 'I apply professional ceramic coatings in Bellevue for customers across Omaha who want real protection. This 3-year system provides a durable hydrophobic layer that resists environmental damage.',
+    price: { car: 700, suv: 800, truck: 900, largeSuv: 1000 },
+    pricingType: 'custom',
+    squareName: '3-Year Ceramic Coating',
+    seo: {
+      title: '3-Year Ceramic Coating Bellevue NE | Omaha Paint Protection',
+      description: 'Durable 3-year ceramic coating in Bellevue, NE. Hydrophobic protection that makes cleaning easier. Serving the Omaha metro.'
+    },
+    features: ['3-Year Professional Grade Coating', 'Deep Hydrophobic Properties', 'UV Protection Barrier', 'Ease of Maintenance', 'Technical Prep Wash Included'],
+    duration: '1-2 Days',
+    bestFor: 'Long-term shoppers on a budget.'
   },
   {
     id: 'ceramic-5yr',
-    categoryId: 'ceramic-coating',
-    name: '5-Year Ceramic Coating',
-    description: 'Increased durability and gloss. Enhanced resistance to environmental fallout and chemical etching for half a decade.',
-    price: { car: 1200, suv: 1300, truck: 1400, largeSuv: 1500 },
-    features: ['5-Year Rated Coating', 'High Scratch Resistance', 'Chemical Guard'],
-    duration: { car: '1 Day', suv: '1.5 Days', truck: '1.5 Days', largeSuv: '2 Days' },
-    badge: '5 Year',
-    bestFor: 'Vehicles that spend significant time outdoors or in harsh conditions.',
-  },
-  {
-    id: 'ceramic-7yr',
-    categoryId: 'ceramic-coating',
-    name: '7-Year Ceramic Coating',
-    description: 'The ultimate paint protection armor. Maximum hardness, longevity, and self-cleaning properties. Multi-layer application.',
-    price: { car: 1500, suv: 1650, truck: 1800, largeSuv: 2000 },
-    features: ['7+ Year Rated Coating', 'Multi-Layer Application', 'Self-Cleaning Mirror Gloss'],
-    duration: { car: '2 Days', suv: '2.5 Days', truck: '2.5 Days', largeSuv: '3 Days' },
-    badge: 'Lifetime',
-    bestFor: 'High-end vehicles and owners seeking the absolute best protection available.',
+    categoryId: 'protection',
+    name: 'Protection Package',
+    shortDescription: 'Superior durability and high gloss protection. Keeps paint looking new for years.',
+    longDescription: 'Long-term protection that keeps your vehicle cleaner, shinier, and easier to maintain over time.',
+    price: { car: 1100, suv: 1250, truck: 1400, largeSuv: 1550 },
+    pricingType: 'custom',
+    squareName: 'Protection Package',
+    seo: {
+      title: '5-Year Ceramic Coating Bellevue NE | Best Car Protection Omaha',
+      description: 'My most popular 5-year ceramic coating in Bellevue. Professional-grade protection and extreme gloss for Omaha vehicles.'
+    },
+    features: ['5-Year Professional Coating', 'Maximum Gloss & Depth', 'Strongest Chemical Resistance', 'Superior Water Beading', 'Lifetime Warranty Eligibility (Optional)'],
+    duration: '2 Days',
+    bestFor: 'Ultimate long-term protection for any vehicle.',
+    badge: 'Best Value',
+    highlight: true
   },
 
-  // SPECIALTY
+  // --- FULL DETAIL ---
   {
-    id: 'rv-detail',
-    categoryId: 'specialty-services',
-    name: 'RV & Camper Exterior Restore',
-    description: 'Oxidation removal and gloss restoration for fiberglass and gelcoat surfaces. Includes roof cleaning and sealant.',
-    price: { rv: 450 },
-    features: ['Oxidation Removal', 'Roof Cleaning', 'Gelcoat Protection'],
-    duration: { rv: '6-10 hours' },
-    isSpecialty: true,
-    bestFor: 'Fiberglass RVs that have lost their shine or are showing chalky white oxidation.',
+    id: 'full-detail-package',
+    categoryId: 'full-detailing',
+    name: 'Full Detail Package',
+    shortDescription: 'Interior Detail + Exterior Enhancement. Best overall value and most popular choice.',
+    longDescription: 'Complete interior and exterior services bundled together for the best overall results and value.',
+    price: { car: 299, suv: 339, truck: 379, largeSuv: 419 },
+    pricingType: 'fixed',
+    squareName: 'Full Detail Package',
+    seo: {
+      title: 'Full Car Detailing Bellevue NE | Complete Auto Refresh Omaha',
+      description: 'Comprehensive full detailing in Bellevue and Omaha. Interior and exterior restoration in one complete service.'
+    },
+    features: ['Standard Interior Detail', 'Exterior Enhancement Detail', 'Engine Bay Clean & Dressing', 'Exhaust Tip Polishing', 'Door Jam Restoration'],
+    duration: '5-7 hours',
+    bestFor: 'Vehicles that haven’t been detailed in 6+ months.',
+    badge: 'Popular Choice'
   },
   {
-    id: 'boat-detail',
-    categoryId: 'specialty-services',
-    name: 'Marine Detail (Hull & Interior)',
-    description: 'Full boat detailing. Gelcoat protection against salt and UV, deep cleaning of marine vinyl and cabin areas.',
-    price: { rv: 500 },
-    features: ['Marine Gelcoat Sealant', 'Vinyl Restoration', 'Cabin Sanitization'],
-    duration: { rv: '6-12 hours' },
-    isSpecialty: true,
-    bestFor: 'Boats needing a seasonal refresh and protection against harsh marine environments.',
+    id: 'showroom-package',
+    categoryId: 'full-detailing',
+    name: 'Showroom Package',
+    shortDescription: 'Interior Reset + Paint Enhancement. Big transformation inside and out.',
+    longDescription: 'The Showroom Package is for those who want a noticeable transformation. This includes the Interior Reset for heavy cleaning and a Paint Enhancement Polish to restore visual depth and gloss to the exterior.',
+    price: { car: 449, suv: 499, truck: 549, largeSuv: 599 },
+    pricingType: 'fixed',
+    squareName: 'Showroom Package',
+    seo: {
+      title: 'Showroom Detailing Package Bellevue NE | Deep Restoration Omaha',
+      description: 'Ultimate showroom restoration detail in Bellevue. Intensive interior reset and paint enhancement for Omaha drivers.'
+    },
+    features: ['Interior Reset (Heavy Cleaning)', 'Paint Enhancement Machine Polish', 'Engine Bay Detail', 'Fabric/Leather Protection', '1-Year Paint Protection'],
+    duration: '1 Day',
+    bestFor: 'Pre-sale prep or deep restoration.',
+    highlight: true
   },
+
+  // --- MAINTENANCE ---
+  {
+    id: 'maintenance-detail',
+    categoryId: 'maintenance',
+    name: 'Maintenance Plan',
+    shortDescription: 'Light interior and exterior upkeep to keep your vehicle clean between full details.',
+    longDescription: 'Keep your vehicle looking freshly detailed year-round without needing a full reset every time.',
+    price: { car: 99, suv: 119, truck: 139, largeSuv: 159 },
+    pricingType: 'fixed',
+    squareName: 'Maintenance Plan',
+    seo: {
+      title: 'Car Detailing Maintenance Bellevue NE | Routine Upkeep Omaha',
+      description: 'Maintain your vehicle condition with regular detailing in Bellevue. Best for vehicles that have already had a full reset.'
+    },
+    features: ['Gentle Interior Refresh & Wipe', 'Safe Hand Wash & Dry', 'Tire & Wheel Face Clean', 'Glass Cleaning & Vacuum', 'Protection Top-Off'],
+    duration: '1.5-2.5 hours',
+    bestFor: 'Keeping a clean vehicle clean.'
+  },
+
+  // --- RV & BOAT ---
+  {
+    id: 'rv-boat-wash-wax',
+    categoryId: 'rv-boat-detailing',
+    name: 'RV / Boat Wash & Wax',
+    shortDescription: 'Thorough cleaning with protection for larger vehicles and boats.',
+    longDescription: 'Thorough exterior cleaning followed by protection to improve shine and help prevent environmental buildup. Pricing: $8–$12 per foot depending on size and condition. Serving Bellevue and the entire Omaha metro area.',
+    price: { rv: 8 }, 
+    pricingType: 'variable',
+    squareName: 'RV / Boat Wash & Wax',
+    seo: {
+      title: 'RV & Boat Wash & Wax Bellevue NE | Exterior Protection Omaha',
+      description: 'Professional RV and Boat wash and wax in Bellevue, NE. Serving the Omaha area with specialized care for large vehicles.'
+    },
+    features: ['Technical Exterior Wash', 'Surface Contaminant Removal', 'UV-Resistant Wax Application', 'Roof & Trim Cleaning', 'Wheel & Chrome Polish'],
+    duration: '4-8 hours',
+    isSpecialty: true
+  },
+  {
+    id: 'rv-boat-oxidation',
+    categoryId: 'rv-boat-detailing',
+    name: 'Oxidation Removal (RV/Boat)',
+    shortDescription: 'Removes chalky, faded oxidation and restores surface appearance.',
+    longDescription: 'When gel coat or paint becomes chalky and faded, a simple wash isn’t enough. This intensive restoration process removes oxidation to restore original color and gloss. Pricing: $12–$20 per foot depending on severity.',
+    price: { rv: 12 },
+    pricingType: 'variable',
+    squareName: 'Oxidation Removal (RV/Boat)',
+    seo: {
+      title: 'RV & Boat Oxidation Removal Bellevue NE | Gel Coat Restoration Omaha',
+      description: 'Restore faded gel coat and paint on your RV or boat. Specialized oxidation removal in Bellevue serving the Omaha metro.'
+    },
+    features: ['Multi-Stage Oxidation Removal', 'Gel Coat Restoration', 'High-Gloss Finishing Polish', 'Mirror-Shine Sealant', 'Technical Surface Leveling'],
+    duration: '1-2 Days',
+    isSpecialty: true,
+    badge: 'Pro Restoration'
+  },
+
+  // --- TRACTOR / FARM ---
+  {
+    id: 'tractor-detailing-service',
+    categoryId: 'tractor-detailing',
+    name: 'Tractor / Farm Equipment Detailing',
+    shortDescription: 'Removes heavy dirt and grease to keep equipment looking better and lasting longer.',
+    longDescription: 'Farm equipment and work vehicles take constant abuse from dirt, grease, and weather. Cleaning and restoration services for tractors and machinery in Bellevue. Pricing depends on size and condition. Reach out with photos for a quote.',
+    price: { tractor: 150 }, 
+    pricingType: 'custom',
+    squareName: 'Tractor / Farm Equipment Detailing',
+    seo: {
+      title: 'Tractor & Farm Equipment Detailing Bellevue NE | Omaha Area',
+      description: 'Professional farm machinery and tractor detailing in Bellevue. We remove heavy grease and dirt to protect your investment.'
+    },
+    features: ['Heavy Degreasing & Steam Clean', 'Technical Exterior Wash', 'Component Surface Cleaning', 'Protection Sealant', 'Glass & Cab Restoration'],
+    duration: '4-10 hours',
+    isSpecialty: true
+  }
 ];
+
 

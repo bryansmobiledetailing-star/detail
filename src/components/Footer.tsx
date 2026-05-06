@@ -51,10 +51,23 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-zinc-100 font-medium tracking-wide uppercase text-sm">Services</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/services" className="block py-1 hover:text-zinc-100 transition-colors">Interior Detailing</Link></li>
-            <li><Link to="/services" className="block py-1 hover:text-zinc-100 transition-colors">Exterior Detailing</Link></li>
-            <li><Link to="/services" className="block py-1 hover:text-zinc-100 transition-colors">Paint Correction</Link></li>
-            <li><Link to="/services" className="block py-1 hover:text-zinc-100 transition-colors">Ceramic Coating</Link></li>
+            <li><Link to="/services/interior-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Interior Detailing</Link></li>
+            <li><Link to="/services/exterior-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Exterior Detailing</Link></li>
+            <li><Link to="/services/paint-correction" className="block py-1 hover:text-zinc-100 transition-colors">Paint Correction</Link></li>
+            <li><Link to="/services/ceramic-coating" className="block py-1 hover:text-zinc-100 transition-colors">Ceramic Coating</Link></li>
+            <li><Link to="/services/full-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Full Detailing Packages</Link></li>
+            <li><Link to="/services/rv-boat-detailing" className="block py-1 hover:text-zinc-100 transition-colors">RV, Boat & Equipment Detailing</Link></li>
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <h4 className="text-zinc-100 font-medium tracking-wide uppercase text-sm">Service Areas</h4>
+          <ul className="space-y-2 text-sm">
+            <li><Link to="/areas/omaha-ne" className="block py-1 hover:text-zinc-100 transition-colors">Omaha, NE</Link></li>
+            <li><Link to="/areas/bellevue-ne" className="block py-1 hover:text-zinc-100 transition-colors">Bellevue, NE</Link></li>
+            <li><Link to="/areas/papillion-ne" className="block py-1 hover:text-zinc-100 transition-colors">Papillion, NE</Link></li>
+            <li><Link to="/areas/la-vista-ne" className="block py-1 hover:text-zinc-100 transition-colors">La Vista, NE</Link></li>
+            <li><Link to="/areas/council-bluffs-ia" className="block py-1 hover:text-zinc-100 transition-colors">Council Bluffs, IA</Link></li>
           </ul>
         </div>
 
@@ -66,24 +79,6 @@ export default function Footer() {
             <li><Link to="/gift-cards" className="block py-1 hover:text-zinc-100 transition-colors">Gift Cards</Link></li>
             <li><Link to="/faq" className="block py-1 hover:text-zinc-100 transition-colors">FAQ</Link></li>
             <li><Link to="/admin" className="block py-1 hover:text-zinc-100 transition-colors font-bold text-zinc-300">Admin Dashboard</Link></li>
-            <li><Link to="/terms" className="block py-1 hover:text-zinc-100 transition-colors">Terms of Service</Link></li>
-            <li><Link to="/privacy" className="block py-1 hover:text-zinc-100 transition-colors">Privacy Policy</Link></li>
-            <li><Link to="/sitemap" className="block py-1 hover:text-zinc-100 transition-colors">Sitemap</Link></li>
-            <li className="pt-2 border-t border-zinc-800 mt-2">
-              <button 
-                onClick={handleSync}
-                disabled={isSyncing}
-                className="flex items-center gap-2 hover:text-zinc-100 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                <RefreshCw className={`h-3 w-3 ${isSyncing ? 'animate-spin' : ''}`} />
-                {isSyncing ? 'Syncing...' : 'Sync to Square'}
-              </button>
-              {syncStatus && (
-                <p className={`text-[10px] mt-1 ${syncStatus.includes('Error') ? 'text-red-500' : 'text-green-500'}`}>
-                  {syncStatus}
-                </p>
-              )}
-            </li>
           </ul>
         </div>
 
@@ -105,8 +100,28 @@ export default function Footer() {
           </ul>
         </div>
       </div>
-      <div className="container mx-auto px-4 mt-12 pt-8 border-t border-zinc-800 text-sm text-center">
+      <div className="container mx-auto px-4 mt-12 pt-8 border-t border-zinc-800 text-xs flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex flex-wrap justify-center md:justify-start gap-4">
+          <Link to="/terms" className="hover:text-zinc-100 transition-colors">Terms of Service</Link>
+          <Link to="/privacy" className="hover:text-zinc-100 transition-colors">Privacy Policy</Link>
+          <Link to="/sitemap" className="hover:text-zinc-100 transition-colors">Sitemap</Link>
+          <button 
+            onClick={handleSync}
+            disabled={isSyncing}
+            className="flex items-center gap-2 hover:text-zinc-100 transition-colors disabled:opacity-50 cursor-pointer ml-4 font-black uppercase text-zinc-500"
+          >
+            <RefreshCw className={`h-3 w-3 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Syncing...' : 'Sync Catalog'}
+          </button>
+        </div>
+        
         <p>&copy; {new Date().getFullYear()} Bryan's Showroom Quality Detailing. All rights reserved.</p>
+        
+        {syncStatus && (
+          <p className={`fixed bottom-8 right-8 p-4 rounded-xl shadow-2xl bg-zinc-900 border border-zinc-800 z-50 text-xs font-black uppercase tracking-widest ${syncStatus.includes('Error') ? 'text-red-500' : 'text-emerald-500 animate-bounce'}`}>
+            {syncStatus}
+          </p>
+        )}
       </div>
     </footer>
   );

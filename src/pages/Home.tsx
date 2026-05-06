@@ -6,11 +6,17 @@ import { BOOKING_LINK } from '../lib/constants';
 import DetailingQuiz from '../components/DetailingQuiz';
 import ServiceMap from '../components/ServiceMap';
 import Testimonials from '../components/Testimonials';
-
-import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import AIConditionEstimator from '../components/AIConditionEstimator';
+import { SERVICES } from '../data/services';
+import { CITIES } from '../data/cities';
 
 export default function Home() {
+  const featuredServices = [
+    SERVICES.find(s => s.id === 'interior-detail'),
+    SERVICES.find(s => s.id === 'full-detail-package'),
+    SERVICES.find(s => s.id === 'ceramic-5yr')
+  ].filter(Boolean) as typeof SERVICES;
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -40,9 +46,9 @@ export default function Home() {
               Professional Auto Detailing in <span className="text-zinc-400">Bellevue & Omaha</span>
             </h1>
 
-            <p className="text-xl text-zinc-300 max-w-2xl leading-relaxed">
-              10+ years of showroom quality detailing and professional paint correction. We specialize in precision restoration and ceramic coatings for residents across Bellevue and the entire Omaha metro area.
-            </p>
+          <p className="text-xl text-zinc-300 max-w-2xl leading-relaxed">
+            10+ years of showroom quality detailing and professional paint correction. I specialize in precision restoration and ceramic coatings for residents across <Link to="/areas/bellevue-ne" className="text-white underline decoration-zinc-700 underline-offset-4 hover:decoration-white transition-all">Bellevue</Link> and the entire <Link to="/areas/omaha-ne" className="text-white underline decoration-zinc-700 underline-offset-4 hover:decoration-white transition-all">Omaha</Link> metro area.
+          </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button size="lg" className="text-lg h-14 px-8 bg-white text-zinc-950 hover:bg-zinc-200" asChild>
@@ -94,10 +100,9 @@ export default function Home() {
                   Meticulous <span className="text-zinc-400 italic">Auto Detailing</span> in Omaha.
                 </h3>
                 <p className="text-lg text-zinc-600 leading-relaxed max-w-xl">
-                  Bryan's Showroom Quality Detailing is built on the belief that Omaha and Bellevue drivers deserve more than a basic car wash. We focus on technical precision and professional-grade paint restoration to keep your vehicle looking its best for years to come.
+                  Bryan's Showroom Quality Detailing is built on the belief that <Link to="/areas/omaha-ne" className="text-zinc-900 font-bold hover:underline">Omaha</Link> and <Link to="/areas/bellevue-ne" className="text-zinc-900 font-bold hover:underline">Bellevue</Link> drivers deserve more than a basic car wash. We focus on technical precision and professional-grade paint restoration to keep your vehicle looking its best for years to come.
                 </p>
               </div>
-
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="shrink-0 w-12 h-12 bg-zinc-900 text-white rounded-2xl flex items-center justify-center">
@@ -152,7 +157,6 @@ export default function Home() {
                   style={{ width: '632px' }}
                 />
               </div>
-              {/* Decorative elements */}
               <div className="absolute -top-6 -right-6 w-64 h-64 bg-zinc-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
               <div className="absolute -bottom-8 -left-8 w-72 h-72 bg-emerald-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000" />
               
@@ -169,7 +173,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Popular Services */}
+      {/* Popular Services - Data Driven */}
       <section className="py-24 bg-zinc-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
@@ -189,93 +193,76 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Service Card 1 */}
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-zinc-200 flex flex-col">
-              <h3 className="text-xl font-bold text-zinc-900 mb-2">Interior Detail (Level 2)</h3>
-              <p className="text-zinc-600 mb-6 flex-grow">Our signature interior reset. Deep carpet extraction, high-temp steam sanitization, and premium leather/vinyl conditioning.</p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3 text-sm text-zinc-700">
-                  <CheckCircle2 className="h-4 w-4 text-zinc-900" /> Deep carpet & mat extraction
+            {featuredServices.map((service, idx) => (
+              <div 
+                key={service.id} 
+                className={`rounded-3xl p-8 shadow-sm border flex flex-col relative ${
+                  idx === 1 
+                    ? 'bg-zinc-900 text-white border-zinc-800 shadow-2xl transform md:-translate-y-4' 
+                    : 'bg-white text-zinc-900 border-zinc-200'
+                }`}
+              >
+                {idx === 1 && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
+                    Most Popular
+                  </div>
+                )}
+                <h3 className="text-xl font-bold mb-2">{service.name}</h3>
+                <p className={`text-sm mb-6 flex-grow font-medium ${idx === 1 ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                  {service.shortDescription}
+                </p>
+                <div className="space-y-4 mb-8">
+                  {service.features.slice(0, 3).map((f, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm">
+                      <CheckCircle2 className={`h-4 w-4 ${idx === 1 ? 'text-emerald-500' : 'text-zinc-900'}`} />
+                      <span className={idx === 1 ? 'text-zinc-300' : 'text-zinc-700'}>{f}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-700">
-                  <CheckCircle2 className="h-4 w-4 text-zinc-900" /> High-temp steam sanitization
-                </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-700">
-                  <CheckCircle2 className="h-4 w-4 text-zinc-900" /> Leather & vinyl conditioning
+                <div className={`pt-6 border-t mt-auto ${idx === 1 ? 'border-zinc-800' : 'border-zinc-100'}`}>
+                  <p className={`text-sm mb-4 ${idx === 1 ? 'text-zinc-400' : 'text-zinc-500'}`}>
+                    Starting at <span className={`text-lg font-bold ${idx === 1 ? 'text-white' : 'text-zinc-900'}`}>${service.price.car || service.price.rv || service.price.suv}</span>
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <Button className={`w-full ${idx === 1 ? 'bg-white text-zinc-900 hover:bg-zinc-200' : ''}`} asChild>
+                      <Link to="/book">Book Now</Link>
+                    </Button>
+                    <Button variant="ghost" className={`w-full text-xs font-black uppercase tracking-widest ${idx === 1 ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : ''}`} asChild>
+                      <Link to={`/services/detail/${service.id}`}>Learn More</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="pt-6 border-t border-zinc-100 mt-auto">
-                <p className="text-sm text-zinc-500 mb-4">Starting at <span className="text-lg font-bold text-zinc-900">$299</span> (Car)</p>
-                <div className="flex flex-col gap-2">
-                  <Button className="w-full" asChild>
-                    <Link to="/book">Book Now</Link>
-                  </Button>
-                  <Button variant="ghost" className="w-full text-xs font-black uppercase tracking-widest" asChild>
-                    <Link to="/services/detail/signature-interior">Learn More</Link>
-                  </Button>
-                </div>
+            ))}
+          </div>
+
+          {/* Specialty Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            {/* RV & Boat Blurb */}
+            <div className="bg-white rounded-3xl p-8 border border-zinc-200 flex flex-col md:flex-row gap-8 items-center">
+              <div className="shrink-0 w-24 h-24 bg-zinc-900 rounded-2xl flex items-center justify-center text-white">
+                <MapPin className="h-10 w-10" />
+              </div>
+              <div className="flex-grow">
+                <h3 className="text-xl font-bold text-zinc-900 mb-2">RV, Boat & Equipment Detailing</h3>
+                <p className="text-zinc-600 text-sm mb-4">From oxidation removal to full cleanups, I handle larger vehicles and equipment that need more than a basic wash.</p>
+                <Link to="/services/rv-boat-detailing" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-900 hover:gap-3 transition-all">
+                  View Large Detailing <ArrowRight className="h-3 w-3" />
+                </Link>
               </div>
             </div>
 
-            {/* Service Card 2 - Highlighted */}
-            <div className="bg-zinc-900 text-white rounded-2xl p-8 shadow-xl border border-zinc-800 flex flex-col relative transform md:-translate-y-4">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
-                Most Popular
+            {/* Maintenance Blurb */}
+            <div className="bg-zinc-100 rounded-3xl p-8 border border-zinc-200 flex flex-col md:flex-row gap-8 items-center">
+              <div className="shrink-0 w-24 h-24 bg-emerald-500 rounded-2xl flex items-center justify-center text-white">
+                <Sparkles className="h-10 w-10" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Full Detail (Level 3)</h3>
-              <p className="text-zinc-400 mb-6 flex-grow">The "Total Reset". Complete engine bay detail, clay bar decontamination, and 12-month ceramic protection with a deep interior restore.</p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3 text-sm text-zinc-300">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> 12-Month ceramic paint guard
-                </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-300">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Clay bar decontamination
-                </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-300">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Engine bay detail & dressing
-                </div>
-              </div>
-              <div className="pt-6 border-t border-zinc-800 mt-auto">
-                <p className="text-sm text-zinc-400 mb-4">Starting at <span className="text-lg font-bold text-white">$449</span> (Car)</p>
-                <div className="flex flex-col gap-2">
-                  <Button className="w-full bg-white text-zinc-900 hover:bg-zinc-200" asChild>
-                    <Link to="/book">Book Now</Link>
-                  </Button>
-                  <Button variant="ghost" className="w-full text-zinc-400 hover:text-white hover:bg-zinc-800 text-xs font-black uppercase tracking-widest" asChild>
-                    <Link to="/services/detail/showroom-full">Learn More</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Service Card 3 */}
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-zinc-200 flex flex-col relative">
-              <div className="absolute top-0 right-8 -translate-y-1/2 bg-zinc-100 text-zinc-800 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border border-zinc-200">
-                Best Value
-              </div>
-              <h3 className="text-xl font-bold text-zinc-900 mb-2">Ceramic Coating</h3>
-              <p className="text-zinc-600 mb-6 flex-grow">Long-term protection and extreme gloss. Creates a permanent bond with your paint for ultimate durability.</p>
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center gap-3 text-sm text-zinc-700">
-                  <CheckCircle2 className="h-4 w-4 text-zinc-900" /> 3-year professional coating
-                </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-700">
-                  <CheckCircle2 className="h-4 w-4 text-zinc-900" /> Extreme hydrophobic properties
-                </div>
-                <div className="flex items-center gap-3 text-sm text-zinc-700">
-                  <CheckCircle2 className="h-4 w-4 text-zinc-900" /> Prep polish included
-                </div>
-              </div>
-              <div className="pt-6 border-t border-zinc-100 mt-auto">
-                <p className="text-sm text-zinc-500 mb-4">Starting at <span className="text-lg font-bold text-zinc-900">$800</span> (Car)</p>
-                <div className="flex flex-col gap-2">
-                  <Button className="w-full" asChild>
-                    <Link to="/book">Book Now</Link>
-                  </Button>
-                  <Button variant="ghost" className="w-full text-xs font-black uppercase tracking-widest" asChild>
-                    <Link to="/services/detail/ceramic-3yr">Learn More</Link>
-                  </Button>
-                </div>
+              <div className="flex-grow">
+                <h3 className="text-xl font-bold text-zinc-900 mb-2">Maintenance Detailing</h3>
+                <p className="text-zinc-600 text-sm mb-4">Keep your vehicle looking freshly detailed year-round without needing a full reset every time.</p>
+                <Link to="/services/maintenance-plans" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-900 hover:gap-3 transition-all">
+                  Maintain Your Shine <ArrowRight className="h-3 w-3" />
+                </Link>
               </div>
             </div>
           </div>
@@ -365,16 +352,20 @@ export default function Home() {
               Bellevue & Omaha Detailing Excellence
             </h2>
             <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
-              Get showroom-quality results from our premium detailing service based in Bellevue. We serve the entire Omaha metro area including Papillion, La Vista, and Elkhorn with flexible scheduling.
+              Get showroom-quality results from our premium detailing service based in Bellevue. We serve the entire Omaha metro area including <Link to="/areas/papillion-ne" className="text-zinc-900 font-bold hover:underline">Papillion</Link>, <Link to="/areas/la-vista-ne" className="text-zinc-900 font-bold hover:underline">La Vista</Link>, and <Link to="/areas/council-bluffs-ia" className="text-zinc-900 font-bold hover:underline">Council Bluffs</Link> with flexible scheduling.
             </p>
           </div>
           <ServiceMap />
           
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {['Bellevue', 'Omaha', 'Papillion', 'La Vista', 'Gretna', 'Elkhorn', 'Council Bluffs', 'Offutt AFB'].map(city => (
-              <div key={city} className="px-4 py-1.5 bg-white rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-700 shadow-sm">
-                {city}, NE
-              </div>
+            {CITIES.map(city => (
+              <Link
+                key={city.slug}
+                to={`/areas/${city.slug}`}
+                className="px-4 py-3 bg-white rounded-xl border border-zinc-200 text-sm font-black uppercase tracking-widest text-zinc-700 shadow-sm hover:border-zinc-900 hover:text-zinc-900 transition-all"
+              >
+                {city.name}
+              </Link>
             ))}
           </div>
         </div>

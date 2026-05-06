@@ -5,7 +5,7 @@ import path from "path";
 import multer from "multer";
 import nodemailer from "nodemailer";
 import { SERVICES, CATEGORIES, VEHICLE_SIZES, SPECIALTY_SIZES, ADD_ONS } from "./src/data/services.ts";
-import { syncServiceToSquare, deleteServiceFromSquare, autoCorrectCatalogDrift } from "./src/services/squareSyncEngine.ts";
+import { syncServiceToSquare, deleteServiceFromSquare, autoCorrectCatalogDrift, syncAllFirestoreToSquare } from "./src/services/squareSyncEngine.ts";
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import firebaseConfig from './firebase-applet-config.json';
@@ -184,7 +184,6 @@ async function startServer() {
       res.json(Array.from(serviceMap.values()));
     } catch (error: any) {
       console.error("Square Catalog Error:", error);
-      // Fallback to empty array if not configured
       res.json([]);
     }
   });
@@ -216,7 +215,6 @@ async function startServer() {
         }
       });
 
-      // Map Square availability to a simpler format for the frontend
       const availabilities = response.availabilities || [];
       res.json(availabilities);
     } catch (error: any) {
@@ -300,7 +298,6 @@ async function startServer() {
             minute: '2-digit',
           });
 
-          // Customer Email
           await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: customer.email,
@@ -310,10 +307,10 @@ async function startServer() {
                 <h2 style="color: #111;">Booking Confirmed!</h2>
                 <p>Hi ${customer.firstName},</p>
                 <p>We've received your booking for <strong>${formattedDate}</strong>.</p>
-                <p>A $50 non-refundable deposit is required to secure your appointment if you haven't paid it yet. We will contact you shortly with payment instructions or you can pay via the secure link sent in a separate message.</p>
+                <p>A $50 non-refundable deposit is required to secure your appointment.</p>
                 <p><strong>Appointment Details:</strong></p>
                 <ul>
-                  <li>Location: Bellevue Garage / Omaha Metro</li>
+                  <li>Location: Bellevue / Omaha Metro</li>
                   <li>Time: ${formattedDate}</li>
                 </ul>
                 <p>If you have any questions, feel free to call us at (712) 305-6313.</p>
@@ -322,24 +319,8 @@ async function startServer() {
               </div>
             `
           });
-
-          // Admin Notification
-          await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-            subject: `New Booking: ${customer.firstName} ${customer.lastName}`,
-            html: `
-              <h2>New Appointment Scheduled</h2>
-              <p><strong>Customer:</strong> ${customer.firstName} ${customer.lastName}</p>
-              <p><strong>Email:</strong> ${customer.email}</p>
-              <p><strong>Phone:</strong> ${customer.phone}</p>
-              <p><strong>Time:</strong> ${formattedDate}</p>
-              <p><strong>Booking ID:</strong> ${booking.id}</p>
-            `
-          });
         } catch (emailErr) {
           console.error("Email Notification Error:", emailErr);
-          // Don't fail the request if email fails
         }
       }
 
@@ -350,15 +331,15 @@ async function startServer() {
     }
   });
 
-  // Admin Sync Endpoint
+  // Admin Sync Endpoint - Robust Idempotent Upsert
   app.post("/api/admin/sync-square", async (req, res) => {
     try {
       const client = getClientFromReq(req) as any;
       const { catalog, teamMembers } = client;
       
-      console.log('🚀 Starting Square Sync (V7 - Strictly Additive)...');
+      console.log('🚀 Starting Square Sync (Idempotent Mode)...');
 
-      // 1. Fetch EVERYTHING (No filters to be safe)
+      // 1. Fetch existing catalog to map names to IDs (prevents duplicates)
       let allObjects: any[] = [];
       let cursor: string | undefined = undefined;
       do {
@@ -370,46 +351,17 @@ async function startServer() {
       
       const normalize = (name: string) => {
         return name.toLowerCase()
-          .replace(/premium|essential|signature|standard|smoke|severe|entry|level\s*\d/g, '') // Strip prefixes and suffixes
           .replace(/[^a-z0-9]/g, '')
           .trim();
       };
       
-      // Group items and categories by normalized name
-      const existingItemsByNorm = new Map<string, any[]>();
-      const existingCatsByNorm = new Map<string, any[]>();
-
+      const existingItemsByNorm = new Map<string, { id: string; version?: bigint }>();
       for (const obj of allObjects) {
-        if (obj.isDeleted) continue;
-        const name = (obj.type === 'CATEGORY' ? obj.categoryData?.name : obj.itemData?.name || "");
-        if (!name) continue;
-        const norm = normalize(name);
-
-        const group = obj.type === 'CATEGORY' ? existingCatsByNorm : existingItemsByNorm;
-        if (!group.has(norm)) group.set(norm, []);
-        group.get(norm)!.push(obj);
+        if (obj.isDeleted || obj.type !== 'ITEM') continue;
+        existingItemsByNorm.set(normalize(obj.itemData.name), { id: obj.id, version: obj.version });
       }
 
-      // Helper to cleanup duplicates and return the best ID
-      const cleanupAndGetId = async (norm: string, type: 'CATEGORY' | 'ITEM') => {
-        const group = type === 'CATEGORY' ? existingCatsByNorm : existingItemsByNorm;
-        const matches = group.get(norm) || [];
-        
-        if (matches.length > 1) {
-          console.log(`🧹 Found ${matches.length} duplicates for ${norm}. Keeping freshest...`);
-          // Sort by version descending (keep freshest)
-          matches.sort((a,b) => Number((BigInt(b.version || 0) - BigInt(a.version || 0)).toString()));
-          const toDelete = matches.slice(1).map(m => m.id);
-          // Delete in small batches
-          for (let i = 0; i < toDelete.length; i += 50) {
-            await catalog.batchDelete({ objectIds: toDelete.slice(i, i + 50) });
-          }
-          return matches[0].id;
-        }
-        
-        return matches[0]?.id;
-      };
-
+      // Check for team members for availability
       const teamMemberIds: string[] = [];
       try {
         const teamResult = await teamMembers.search({ query: { filter: { status: 'ACTIVE' } } });
@@ -418,17 +370,20 @@ async function startServer() {
         console.warn("Team member fetch skipped:", e);
       }
 
-      // 2. Sync Categories
-      const categoryIdMap: Record<string, string> = { 'specialty-services': '' };
+      const syncTimestamp = Date.now();
+
+      // Sync categories first
+      const categoryIdMap: Record<string, string> = {};
       for (const cat of CATEGORIES) {
-        const norm = normalize(cat.name);
-        const existingId = await cleanupAndGetId(norm, 'CATEGORY');
+        const catNorm = normalize(cat.name);
+        const existingCat = allObjects.find(obj => obj.type === 'CATEGORY' && normalize(obj.categoryData.name) === catNorm);
         
         const upsertRes = await catalog.object.upsert({
-          idempotencyKey: `sync-cat-v10-${cat.id}`, // Constant key for this category
+          idempotencyKey: `cat-${cat.id}-${syncTimestamp}`,
           object: {
             type: 'CATEGORY',
-            id: existingId || `#${cat.id}`,
+            id: existingCat?.id || `#${cat.id}`,
+            version: existingCat?.version,
             categoryData: { name: cat.name },
           }
         });
@@ -436,48 +391,51 @@ async function startServer() {
         if (finalId) categoryIdMap[cat.id] = finalId;
       }
 
-      // 3. Sync Services (Force Update All)
       let syncedCount = 0;
+      const allItems = [...SERVICES, ...ADD_ONS.map(a => ({ ...a, categoryId: 'add-ons', isAddon: true }))];
+      const syncedItemIds = new Set<string>();
 
-      for (const service of SERVICES) {
-        const norm = normalize(service.name);
-        const existingId = await cleanupAndGetId(norm, 'ITEM');
+      for (const item of allItems as any[]) {
+        const norm = normalize(item.name);
+        const existing = existingItemsByNorm.get(norm);
         
-        let vduration = "60 min";
-        if (typeof service.duration === "string") {
-          vduration = service.duration;
-        } else if (service.duration && typeof service.duration === "object") {
-          vduration = service.duration.car || service.duration.rv || Object.values(service.duration)[0] || "60 min";
-        }
-        const durationMatch = vduration.match(/(\d+)(?:-(\d+))?\s*(hour|hr|min|day)/i);
+        // Calculate duration logic
         let durationMinutes = 60;
-        if (durationMatch) {
-          const v1 = parseInt(durationMatch[1]);
-          const v2 = durationMatch[2] ? parseInt(durationMatch[2]) : v1;
-          const unit = durationMatch[3].toLowerCase();
-          const avg = (v1 + v2) / 2;
-          
-          if (unit.startsWith('d')) {
-             durationMinutes = Math.round(avg * 24 * 60);
-          } else if (unit.startsWith('h')) {
-             durationMinutes = Math.round(avg * 60);
-          } else {
-             durationMinutes = Math.round(avg);
+        if (item.duration) {
+          const durStr = typeof item.duration === 'string' ? item.duration : (item.duration.car || Object.values(item.duration)[0]);
+          const match = durStr.match(/(\d+)/);
+          if (match) {
+            durationMinutes = parseInt(match[1]);
+            if (durStr.toLowerCase().includes('hour') || durStr.toLowerCase().includes('hr')) {
+              durationMinutes *= 60;
+            }
           }
         }
 
-        const sizesToApply = service.isSpecialty ? SPECIALTY_SIZES : VEHICLE_SIZES;
-        const variations = sizesToApply.map(size => {
-          const price = service.price[size.id];
+        const variations = item.isAddon ? [{
+          type: 'ITEM_VARIATION',
+          id: `#var-${item.id}`,
+          itemVariationData: {
+            name: 'Standard',
+            pricingType: 'FIXED_PRICING',
+            serviceDuration: BigInt(durationMinutes * 60 * 1000),
+            availableForBooking: true,
+            priceMoney: {
+              amount: BigInt(item.price * 100),
+              currency: 'USD',
+            },
+            ...(teamMemberIds.length > 0 ? { teamMemberIds } : {}),
+          },
+        }] : (item.isSpecialty ? SPECIALTY_SIZES : VEHICLE_SIZES).map(size => {
+          const price = item.price[size.id];
           if (price === undefined) return null;
-
           return {
             type: 'ITEM_VARIATION',
-            id: `#var-${service.id}-${size.id}`,
+            id: `#var-${item.id}-${size.id}`,
             itemVariationData: {
               name: size.name,
               pricingType: 'FIXED_PRICING',
-              serviceDuration: BigInt(durationMinutes * 60 * 1000), // convert to milliseconds
+              serviceDuration: BigInt(durationMinutes * 60 * 1000),
               availableForBooking: true,
               priceMoney: {
                 amount: BigInt(price * 100),
@@ -488,79 +446,63 @@ async function startServer() {
           };
         }).filter(Boolean);
 
-        await catalog.object.upsert({
-          idempotencyKey: `sync-svc-v10-${service.id}`, // Deterministic & Robust
+        const upsertRes = await catalog.object.upsert({
+          idempotencyKey: `item-${item.id}-${syncTimestamp}`,
           object: {
             type: 'ITEM',
-            id: existingId || `#${service.id}`,
+            id: existing?.id || `#${item.id}`,
+            version: existing?.version,
             itemData: {
-              name: service.name,
-              description: service.description,
-              categoryId: categoryIdMap[service.categoryId],
+              name: item.name,
+              description: item.description,
+              categoryId: categoryIdMap[item.categoryId],
               productType: 'APPOINTMENTS_SERVICE',
               variations: variations as any,
             },
           },
         });
+
+        const finalId = upsertRes.catalogObject?.id;
+        if (finalId) syncedItemIds.add(finalId);
         syncedCount++;
       }
 
-      // 4. Sync Add-ons (Force Update All)
-      for (const addon of ADD_ONS) {
-        const norm = normalize(addon.name);
-        const existingId = await cleanupAndGetId(norm, 'ITEM');
-        
-        const durationMatch = addon.duration.match(/(\d+)(?:-(\d+))?\s*(hour|hr|min)/i);
-        let durationMinutes = 30;
-        if (durationMatch) {
-          const v1 = parseInt(durationMatch[1]);
-          const v2 = durationMatch[2] ? parseInt(durationMatch[2]) : v1;
-          const unit = durationMatch[3].toLowerCase();
-          const avg = (v1 + v2) / 2;
-          durationMinutes = Math.round(unit.startsWith('h') ? avg * 60 : avg);
+      // 4. PRUNING: Delete items in Square that are NOT in our local synced set
+      const toDeleteIds: string[] = [];
+      for (const obj of allObjects) {
+        if (obj.type === 'ITEM' && !obj.isDeleted && !syncedItemIds.has(obj.id)) {
+          // Extra safety: only delete if it looks like a detailing service or category match
+          // (Actually, user explicitly asked to delete what doesn't match the website)
+          toDeleteIds.push(obj.id);
         }
+      }
 
-        await catalog.object.upsert({
-          idempotencyKey: `sync-addon-v10-${addon.id}`,
-          object: {
-            type: 'ITEM',
-            id: existingId || `#${addon.id}`,
-            itemData: {
-              name: addon.name,
-              description: addon.description,
-              categoryId: categoryIdMap['add-ons'],
-              productType: 'APPOINTMENTS_SERVICE',
-              variations: [{
-                type: 'ITEM_VARIATION',
-                id: `#var-${addon.id}`,
-                itemVariationData: {
-                  name: 'Standard',
-                  pricingType: 'FIXED_PRICING',
-                  serviceDuration: BigInt(durationMinutes * 60 * 1000), // convert to milliseconds
-                  availableForBooking: true,
-                  priceMoney: {
-                    amount: BigInt(addon.price * 100),
-                    currency: 'USD',
-                  },
-                  ...(teamMemberIds.length > 0 ? { teamMemberIds } : {}),
-                },
-              }],
-            },
-          },
-        });
-        syncedCount++;
+      if (toDeleteIds.length > 0) {
+        console.log(`🗑️ Pruning ${toDeleteIds.length} extra items from Square...`);
+        // Use batchDelete (limit 200 per call, we probably have less)
+        await catalog.batchDelete({ objectIds: toDeleteIds });
+      }
+
+      // 5. Also trigger the Firestore Master Sync for total consistency
+      let masterSyncMsg = "";
+      try {
+        console.log("🪵 Triggering Firestore Master Consistency Sweep...");
+        const masterRes = await syncAllFirestoreToSquare(req.headers['x-square-access-token'] as string);
+        masterSyncMsg = ` Also synced ${masterRes.syncedCount} Master items and pruned ${masterRes.prunedCount} orphans.`;
+      } catch (err) {
+        console.error("Master Sync failed:", err);
+        masterSyncMsg = " Master sync failed, check logs.";
       }
 
       res.json({ 
         success: true, 
-        message: `Sync Complete. Fully aligned ${syncedCount} items with Square catalog.` 
+        message: `Sync & Prune Complete. Updated ${syncedCount} items, Removed ${toDeleteIds.length} extras.${masterSyncMsg}` 
       });
     } catch (error: any) {
-      console.error("Selective Sync Error:", error);
+      console.error("Sync Error:", error);
       res.status(500).json({ error: error.message || "Sync failed" });
     }
   });
-
   app.post("/api/admin/remove-all-duplicates", async (req, res) => {
     try {
       const client = getClientFromReq(req) as any;

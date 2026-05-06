@@ -33,6 +33,21 @@ export default function ServiceDetail() {
     ? CATEGORIES.find((c) => c.id === service.categoryId)
     : null;
 
+  React.useEffect(() => {
+    if (service) {
+      document.title = service.seo.title;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute('content', service.seo.description);
+      } else {
+        const desc = document.createElement('meta');
+        desc.name = "description";
+        desc.content = service.seo.description;
+        document.head.appendChild(desc);
+      }
+    }
+  }, [service]);
+
   const allSizes = [...VEHICLE_SIZES, ...SPECIALTY_SIZES];
 
   if (!service || !category) {
@@ -113,7 +128,7 @@ export default function ServiceDetail() {
                   {service.name}
                 </h1>
                 <p className="text-xl text-zinc-500 font-medium leading-relaxed max-w-xl">
-                  {service.description}
+                  {service.longDescription}
                 </p>
               </div>
 
@@ -304,7 +319,7 @@ export default function ServiceDetail() {
               </div>
 
               {/* Scope & Recommendations Section */}
-              {(service.bestFor || service.considerAlternative) && (
+              {service.bestFor && (
                 <div className="space-y-8 pt-8 border-t border-zinc-100">
                   <div className="flex items-center gap-4">
                     <div className="h-px flex-grow bg-zinc-200" />
@@ -329,43 +344,6 @@ export default function ServiceDetail() {
                             {service.bestFor}
                           </p>
                         </div>
-                      </div>
-                    )}
-
-                    {service.considerAlternative && (
-                      <div className="p-8 rounded-[2.5rem] bg-white border border-zinc-200 shadow-sm relative overflow-hidden group flex flex-col justify-between">
-                        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-                          <AlertTriangle className="h-20 w-20" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-4 italic flex items-center gap-2">
-                            <Lightbulb className="h-3 w-3" />
-                            Alternative Path
-                          </p>
-                          <p className="text-sm font-semibold text-zinc-500 leading-relaxed mb-6 relative z-10">
-                            {service.considerAlternative.text}
-                          </p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          className="rounded-xl h-10 text-[10px] font-black uppercase tracking-widest border-zinc-200 hover:bg-zinc-900 hover:text-white transition-all relative z-10 w-fit"
-                          asChild
-                        >
-                          <Link
-                            to={`/services/detail/${service.considerAlternative.targetServiceId}`}
-                            className="flex items-center gap-2"
-                          >
-                            Compare{" "}
-                            {
-                              SERVICES.find(
-                                (s) =>
-                                  s.id ===
-                                  service.considerAlternative?.targetServiceId,
-                              )?.name.split(" (")[0]
-                            }{" "}
-                            <ChevronRight className="h-3 w-3" />
-                          </Link>
-                        </Button>
                       </div>
                     )}
                   </div>
@@ -484,7 +462,7 @@ export default function ServiceDetail() {
                     <ChevronRight className="h-5 w-5 text-zinc-300 group-hover:text-zinc-900 translate-x-0 group-hover:translate-x-1 transition-all" />
                   </div>
                   <p className="text-sm text-zinc-500 font-medium line-clamp-2 mb-6">
-                    {relService.description}
+                    {relService.shortDescription}
                   </p>
                   <div className="mt-auto pt-6 border-t border-zinc-50 flex justify-between items-center">
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">

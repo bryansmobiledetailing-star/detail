@@ -14,7 +14,7 @@
     "clean": "rm -rf dist",
     "sync-square": "tsx scripts/sync-to-square.ts",
     "migrate-to-master": "tsx scripts/migrate-to-master.ts",
-    "lint": "tsc --noEmit",
+    "lint": "eslint . && tsc --noEmit",
     "start": "node server.ts"
   },
   "engines": {

@@ -19,6 +19,7 @@ export interface SquareSyncResult {
   squareId?: string;
   version?: bigint;
   error?: string;
+  message?: string;
 }
 
 /**
@@ -35,6 +36,22 @@ export async function syncServiceToSquare(serviceId: string, accessToken?: strin
     const service = serviceDoc.data()!;
     const client = getSquareClient(accessToken) as any;
     const locationId = getSquareLocationId();
+
+    // Handle INACTIVE services
+    if (service.active === false) {
+      if (service.squareId) {
+        console.log(`🗑️ Service ${service.name} is INACTIVE. Removing from Square...`);
+        await deleteServiceFromSquare(service.squareId, accessToken);
+        await db.collection('services').doc(serviceId).update({
+          squareId: admin.firestore.FieldValue.delete(),
+          squareVersion: admin.firestore.FieldValue.delete(),
+          syncStatus: 'removed',
+          lastSyncAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        return { success: true, message: 'Removed inactive service from Square' };
+      }
+      return { success: true, message: 'Service is inactive and not in Square' };
+    }
 
     // 2. Map variations (Vehicle sizes)
     const variations = Object.entries(service.price).map(([sizeId, price]) => {
@@ -193,4 +210,55 @@ export async function autoCorrectCatalogDrift(squareObjectId: string, squareVers
       error: `Detected external change in Square (version ${squareVersion}). Force-mirrored master truth.`
     });
   }
+}
+
+/**
+ * Full Consistency Check:
+ * Sweeps all services in Firestore and ensures Square matches.
+ * Also deletes any items in Square that aren't in Firestore "services" collection.
+ */
+export async function syncAllFirestoreToSquare(accessToken?: string) {
+  console.log('🔄 Starting Full Firestore -> Square Consistency Sync...');
+  const client = getSquareClient(accessToken) as any;
+  
+  // 1. Get all from Firestore
+  const masterSnapshot = await db.collection('services').get();
+  const masterServices = masterSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const activeMasterIds = new Set(masterServices.filter((s: any) => s.active !== false).map(s => s.id));
+
+  // 2. Sync each active service (Upsert)
+  const syncPromises = masterServices.map(svc => syncServiceToSquare(svc.id, accessToken));
+  await Promise.all(syncPromises);
+
+  // 3. Prune orphans: things in Square that aren't in our active master list
+  // Fetch everything from Square Catalog
+  let squareItems: any[] = [];
+  let cursor: string | undefined = undefined;
+  do {
+    const response: any = await client.catalogApi.listCatalog({ cursor, types: 'ITEM' });
+    squareItems = squareItems.concat(response.result.objects || []);
+    cursor = response.result.cursor;
+  } while (cursor);
+
+  const toDelete: string[] = [];
+  for (const item of squareItems) {
+    if (item.isDeleted) continue;
+    
+    // Check if it belongs to us (by ID pattern or by looking up in our DB)
+    // Our synced items usually have IDs like 'master-svc-...' or we store the ID in Firestore
+    const isOurService = masterServices.some((s: any) => s.squareId === item.id);
+    const belongsToUsButInactive = masterServices.some((s: any) => s.squareId === item.id && s.active === false);
+    
+    // If it's an item we manage but shouldn't be there, or if it has our signature ID pattern but isn't in our DB
+    if (belongsToUsButInactive) {
+      toDelete.push(item.id);
+    }
+  }
+
+  if (toDelete.length > 0) {
+    console.log(`🗑️ Full Sync: Pruning ${toDelete.length} inactive/orphaned items from Square.`);
+    await client.catalogApi.batchDeleteCatalogObjects({ objectIds: toDelete });
+  }
+
+  return { syncedCount: masterServices.length, prunedCount: toDelete.length };
 }

@@ -6,9 +6,7 @@ import {
   ChevronRight, 
   ChevronLeft, 
   Clock, 
-  Car, 
   CheckCircle2, 
-  AlertCircle,
   Loader2,
   Phone,
   Mail,
@@ -17,11 +15,9 @@ import {
   CreditCard as CardIcon
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { VEHICLE_SIZES, SPECIALTY_SIZES, ADD_ONS, SERVICES } from '../data/services';
+import { VEHICLE_SIZES, SPECIALTY_SIZES, SERVICES } from '../data/services';
 import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isBefore, startOfToday, parseISO } from 'date-fns';
 import { getSquareHeaders, getSquareAppId, getSquareLocationId } from '../lib/config';
-import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { PaymentForm, CreditCard } from 'react-square-web-payments-sdk';
 
 type Step = 'service' | 'size' | 'addons' | 'datetime' | 'details' | 'payment' | 'success';
@@ -197,35 +193,6 @@ export default function Booking() {
       
       const booking = await res.json();
       setPendingBooking(booking);
-
-      // Save to Firestore for user history and admin dashboard
-      try {
-        const bookingData = {
-          userId: auth.currentUser?.uid || 'guest',
-          squareBookingId: booking.id,
-          startAt: selectedSlot.startAt,
-          locationId: booking.locationId,
-          serviceVariationIds: [vId],
-          customer: customerInfo,
-          totalPrice: totalPrice(),
-          status: 'pending_payment',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        };
-
-        const bookingRef = await addDoc(collection(db, 'bookings'), bookingData);
-
-        // If user is logged in, link the booking to their profile
-        if (auth.currentUser) {
-          const userRef = doc(db, 'users', auth.currentUser.uid);
-          await updateDoc(userRef, {
-            bookings: arrayUnion(bookingRef.id),
-            updatedAt: serverTimestamp()
-          });
-        }
-      } catch (fsErr) {
-        console.error("Firestore Booking Sync Error:", fsErr);
-      }
       
       setStep('payment');
     } catch (err: any) {

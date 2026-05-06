@@ -20,7 +20,7 @@ export async function analyzeVehicleImage(base64Image: string): Promise<Recommen
     - Severe: Heavy oxidation, deep scratches, major interior stains, mold, or neglected paint.
 
     SERVICES LIST:
-    ${SERVICES.map(s => `- ${s.name} (ID: ${s.id}, Category: ${s.categoryId}, Description: ${s.description})`).join("\n")}
+    ${SERVICES.map(s => `- ${s.name} (ID: ${s.id}, Category: ${s.categoryId}, Description: ${s.shortDescription})`).join("\n")}
     
     Mapping Rules:
     1. If condition is "Light", prioritize: "Full Detail (Level 1: Essential)", "Interior Detail (Level 1: Refresh)", or "Maintenance Wash (Bi-Weekly)".

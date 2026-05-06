@@ -9,6 +9,12 @@ import { BOOKING_LINK } from '../lib/constants';
 export default function CategoryDetail() {
   const { slug } = useParams<{ slug: string }>();
   const category = CATEGORIES.find(c => c.slug === slug);
+
+  React.useEffect(() => {
+    if (category) {
+      document.title = `${category.name} | Showroom Quality Detailing Bellevue`;
+    }
+  }, [category]);
   
   if (!category) {
     return (
@@ -97,7 +103,7 @@ export default function CategoryDetail() {
                       )}
                       <h2 className="text-4xl font-bold text-zinc-900 tracking-tight">{service.name}</h2>
                       <p className="text-lg text-zinc-600 leading-relaxed">
-                        {service.description}
+                        {service.shortDescription}
                       </p>
                     </div>
 

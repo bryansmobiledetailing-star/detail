@@ -8,58 +8,54 @@ import { BOOKING_LINK } from '../lib/constants';
 const QUESTIONS = [
   {
     id: 'vehicle_type',
-    question: "What type of vehicle do you drive?",
+    question: "What type of vehicle do we need to transform?",
     options: [
-      { id: 'car', label: 'Sedan / Coupe', icon: <Car className="h-5 w-5" />, score: 0 },
-      { id: 'suv', label: 'SUV / Truck', icon: <Users className="h-5 w-5" />, score: 0 },
-      { id: 'rv', label: 'RV / Motorhome', icon: <Shield className="h-5 w-5" />, score: 0 },
+      { id: 'car', label: 'Sedan / Coupe', icon: <Car className="h-5 w-5" /> },
+      { id: 'suv', label: 'Small SUV / Crossover', icon: <Users className="h-5 w-5" /> },
+      { id: 'truck', label: 'Truck / Large SUV', icon: <Users className="h-5 w-5" /> },
+      { id: 'largeSuv', label: 'XL Vehicle / Van', icon: <Users className="h-5 w-5" /> },
+      { id: 'rv', label: 'RV / Motorhome / Boat', icon: <Shield className="h-5 w-5" /> },
     ]
   },
   {
-    id: 'parking',
-    question: "Where is your vehicle primarily parked?",
+    id: 'exterior_condition',
+    question: "How would you describe the exterior paint condition?",
     options: [
-      { id: 'indoor', label: 'Indoor / Covered', icon: <Shield className="h-5 w-5" />, score: 10 },
-      { id: 'driveway', label: 'Driveway', icon: <Droplets className="h-5 w-5" />, score: 5 },
-      { id: 'street', label: 'Street', icon: <Wind className="h-5 w-5" />, score: 2 },
+      { id: 'clean', label: 'Mostly Clean (Light dust only)', icon: <CheckCircle2 className="h-5 w-5" />, weight: 1 },
+      { id: 'dirty', label: 'Average (Road grime, bugs)', icon: <Droplets className="h-5 w-5" />, weight: 2 },
+      { id: 'rough', label: 'Rough (Swirls, scratches, gritty)', icon: <Wind className="h-5 w-5" />, weight: 3 },
+      { id: 'neglected', label: 'Severe (Oxidation, heavy damage)', icon: <Trash2 className="h-5 w-5" />, weight: 5 },
     ]
   },
   {
-    id: 'wash_frequency',
-    question: "How often do you wash your vehicle?",
+    id: 'interior_condition',
+    question: "What's the current state of the interior?",
     options: [
-      { id: 'weekly', label: 'Weekly', icon: <Zap className="h-5 w-5" />, score: 10 },
-      { id: 'monthly', label: 'Monthly', icon: <Droplets className="h-5 w-5" />, score: 7 },
-      { id: 'rarely', label: 'Rarely', icon: <Trash2 className="h-5 w-5" />, score: 3 },
+      { id: 'pristine', label: 'Pristine (Like new)', icon: <Sparkles className="h-5 w-5" />, weight: 1 },
+      { id: 'moderate', label: 'Moderate (Crumbs, light dust)', icon: <User className="h-5 w-5" />, weight: 2 },
+      { id: 'messy', label: 'Messy (Pet hair, stains, spills)', icon: <Users className="h-5 w-5" />, weight: 3 },
+      { id: 'severe', label: 'Severe (Odors, mold, heavy neglect)', icon: <Trash2 className="h-5 w-5" />, weight: 5 },
     ]
   },
   {
-    id: 'paint_feel',
-    question: "How does the paint feel when you touch it?",
+    id: 'primary_goal',
+    question: "What is your primary goal for this service?",
     options: [
-      { id: 'smooth', label: 'Smooth like glass', icon: <CheckCircle2 className="h-5 w-5" />, score: 10 },
-      { id: 'rough', label: 'Rough or gritty', icon: <Wind className="h-5 w-5" />, score: 5 },
-      { id: 'swirls', label: 'I see swirl marks', icon: <Droplets className="h-5 w-5" />, score: 4 },
-    ]
-  },
-  {
-    id: 'interior_usage',
-    question: "How would you describe the interior usage?",
-    options: [
-      { id: 'light', label: 'Light (Just me)', icon: <User className="h-5 w-5" />, score: 10 },
-      { id: 'moderate', label: 'Moderate (Family/Kids)', icon: <Users className="h-5 w-5" />, score: 6 },
-      { id: 'heavy', label: 'Heavy (Pets/Work)', icon: <Trash2 className="h-5 w-5" />, score: 2 },
+      { id: 'maintenance', label: 'Periodic Maintenance', icon: <Zap className="h-5 w-5" /> },
+      { id: 'rejuvenate', label: 'Deep Refresh / Restoration', icon: <Sparkles className="h-5 w-5" /> },
+      { id: 'protection', label: 'Extreme Protection & Gloss', icon: <Shield className="h-5 w-5" /> },
+      { id: 'selling', label: 'Maximize Value for Sale', icon: <CheckCircle2 className="h-5 w-5" /> },
     ]
   }
 ];
 
 export default function DetailingQuiz() {
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, { id: string, score: number }>>({});
+  const [answers, setAnswers] = useState<Record<string, { id: string, weight?: number }>>({});
   const [isFinished, setIsFinished] = useState(false);
 
-  const handleSelect = (questionId: string, optionId: string, score: number) => {
-    setAnswers(prev => ({ ...prev, [questionId]: { id: optionId, score } }));
+  const handleSelect = (questionId: string, optionId: string, weight?: number) => {
+    setAnswers(prev => ({ ...prev, [questionId]: { id: optionId, weight } }));
     if (step < QUESTIONS.length - 1) {
       setStep(step + 1);
     } else {
@@ -67,54 +63,64 @@ export default function DetailingQuiz() {
     }
   };
 
-  const totalScore = (Object.values(answers) as { score: number }[]).reduce((a, b) => a + b.score, 0);
-  const maxScore = (QUESTIONS.length - 1) * 10; 
-  const healthScore = Math.round((totalScore / maxScore) * 100);
-
   const getRecommendation = () => {
-    const isRV = answers['vehicle_type']?.id === 'rv';
-    
-    const isHighTicketCandidate = answers['paint_feel']?.id === 'swirls' || answers['paint_feel']?.id === 'rough';
-    
-    if (isRV) {
+    const vehicleType = answers['vehicle_type']?.id || 'car';
+    const exteriorWeight = answers['exterior_condition']?.weight || 1;
+    const interiorWeight = answers['interior_condition']?.weight || 1;
+    const goal = answers['primary_goal']?.id;
+
+    // Specialty handling
+    if (vehicleType === 'rv') {
       return {
-        title: "RV Specialist Care",
-        desc: "RV surfaces require specialized decontamination and protection to prevent oxidation. We recommend our 'RV Exterior Wash & Ceramic' to preserve your investment.",
-        package: "RV Exterior Wash & Ceramic",
-        id: "rv-wash-protect",
+        title: "Specialty Restoration",
+        desc: "RVs and Boats require specialized industrial-grade decontamination and gelcoat protection to combat oxidation.",
+        package: "RV & Boat Restoration",
+        id: "rv-detail",
+        priceRange: "$450+",
         highTicket: true
       };
     }
 
-    if (isHighTicketCandidate) {
+    // Logic Tree
+    if (goal === 'protection' || exteriorWeight >= 3) {
       return {
-        title: "Paint Correction Needed",
-        desc: "Since you've detected surface defects (swirls/grittiness), a standard wash won't fix it. You need Paint Correction + Ceramic Coating to permanently restore that glass-like finish.",
-        package: "Ceramic Coating + Paint Correction",
-        id: "ceramic-coating",
+        title: "Extreme Protection Armor",
+        desc: "To achieve permanent gloss and protection, we recommend our Ceramic Coating package paired with precision paint correction.",
+        package: "3-Year Ceramic Coating",
+        id: "ceramic-3yr",
+        priceRange: "$800 - $1,100",
         highTicket: true
       };
     }
 
-    if (healthScore > 80) return {
-      title: "Maintenance Pro",
-      desc: "Your vehicle is in great shape! Let's keep it that way. A professional decontamination wash and sealant will lock in this condition.",
-      package: "Maintenance Detail",
-      id: "maintenance-detail",
-      highTicket: false
-    };
-    if (healthScore > 50) return {
-      title: "Needs a Refresh",
-      desc: "Your vehicle is showing some wear. Our 'Showroom Full Detail' will bring back that showroom shine and remove light contaminants.",
-      package: "Showroom Full Detail",
-      id: "showroom-full",
-      highTicket: false
-    };
+    if (goal === 'selling' || interiorWeight >= 3 || exteriorWeight === 2) {
+      return {
+        title: "The Showroom Reset",
+        desc: "Your vehicle needs a deep technical decontamination and interior restoration to bring back that new-car feeling.",
+        package: "Level 3: Showroom Full Detail",
+        id: "showroom-full",
+        priceRange: "$449 - $649",
+        highTicket: false
+      };
+    }
+
+    if (goal === 'maintenance' && interiorWeight <= 2 && exteriorWeight <= 2) {
+      return {
+        title: "Maintenance Advantage",
+        desc: "Your vehicle is well-maintained! Keep it that way with our premium maintenance plan to prevent long-term wear.",
+        package: "Maintenance Wash / Detail",
+        id: "maintenance-wash",
+        priceRange: "$60 - $120",
+        highTicket: false
+      };
+    }
+
     return {
-      title: "Restoration Candidate",
-      desc: "Your vehicle needs some serious love. We recommend our 'Showroom Full Detail' with a Paint Correction add-on for the best results.",
-      package: "Showroom Full Detail",
-      id: "showroom-full",
+      title: "Essential Refresh",
+      desc: "A thorough seasonal reset to remove light grime and protect your investment for the months ahead.",
+      package: "Level 1: Essential Full Detail",
+      id: "essential-full",
+      priceRange: "$249 - $399",
       highTicket: false
     };
   };
@@ -153,7 +159,7 @@ export default function DetailingQuiz() {
                 {QUESTIONS[step].options.map(opt => (
                   <button
                     key={opt.id}
-                    onClick={() => handleSelect(QUESTIONS[step].id, opt.id, opt.score)}
+                    onClick={() => handleSelect(QUESTIONS[step].id, opt.id, opt.weight)}
                     className="flex items-center justify-between p-4 rounded-2xl border-2 border-zinc-100 hover:border-zinc-900 hover:bg-zinc-50 transition-all text-left group"
                   >
                     <div className="flex items-center gap-3">
@@ -181,29 +187,10 @@ export default function DetailingQuiz() {
               key="result"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-8 text-center"
+              className="p-10 text-center"
             >
-              <div className="relative w-32 h-32 mx-auto mb-8">
-                <svg className="w-full h-full" viewBox="0 0 100 100">
-                  <circle 
-                    cx="50" cy="50" r="45" 
-                    fill="none" stroke="#f4f4f5" strokeWidth="8" 
-                  />
-                  <motion.circle 
-                    cx="50" cy="50" r="45" 
-                    fill="none" stroke={healthScore > 70 ? "#10b981" : healthScore > 40 ? "#f59e0b" : "#ef4444"} 
-                    strokeWidth="8" 
-                    strokeDasharray="283"
-                    initial={{ strokeDashoffset: 283 }}
-                    animate={{ strokeDashoffset: 283 - (283 * healthScore) / 100 }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-black text-zinc-900">{healthScore}%</span>
-                  <span className="text-[10px] font-bold uppercase text-zinc-400">Health</span>
-                </div>
+              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Sparkles className="h-10 w-10 text-emerald-600" />
               </div>
 
               <h2 className="text-3xl font-black text-zinc-900 mb-2">{recommendation.title}</h2>
@@ -211,14 +198,23 @@ export default function DetailingQuiz() {
                 {recommendation.desc}
               </p>
 
-              <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100 mb-8">
-                <p className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Recommended Package</p>
-                <p className="text-xl font-black text-zinc-900">{recommendation.package}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Recommended Package</p>
+                  <p className="text-lg font-black text-zinc-900 leading-tight">{recommendation.package}</p>
+                </div>
+                <div className="bg-zinc-900 p-6 rounded-3xl text-white">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">Estimated Range</p>
+                  <p className="text-2xl font-black">{recommendation.priceRange}</p>
+                </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <Button className="w-full h-14 text-lg font-bold shadow-lg shadow-emerald-100" asChild>
-                  <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">Book This Package Now</a>
+                <Button className="w-full h-16 text-lg font-bold shadow-xl shadow-emerald-100 bg-zinc-900 hover:bg-zinc-800" asChild>
+                  <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">
+                    Secure This Estimate Now
+                    <ChevronRight className="ml-2 h-5 w-5" />
+                  </a>
                 </Button>
                 <Button variant="outline" className="w-full h-12 text-zinc-500" onClick={() => {
                   setStep(0);

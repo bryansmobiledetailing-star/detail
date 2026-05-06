@@ -25,8 +25,10 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import CategoryDetail from './pages/CategoryDetail';
 import ServiceDetail from './pages/ServiceDetail';
+import CityDetail from './pages/CityDetail';
 import ChatAssistant from './components/ChatAssistant';
 import { CATEGORIES, SERVICES } from './data/services';
+import { CITIES } from './data/cities';
 
 function SEO() {
   const { pathname } = useLocation();
@@ -37,13 +39,14 @@ function SEO() {
 
   const categoryMatch = pathname.match(/^\/services\/([a-z-]+)$/);
   const serviceMatch = pathname.match(/^\/services\/detail\/([a-z0-9-]+)$/);
-  let categorySeo = null;
+  const cityMatch = pathname.match(/^\/areas\/([a-z-]+)$/);
+  let pageSeo = null;
   
   if (categoryMatch) {
     const slug = categoryMatch[1];
     const category = CATEGORIES.find(c => c.slug === slug);
     if (category) {
-      categorySeo = {
+      pageSeo = {
         title: `${category.name} | Bryan's Showroom Quality Detailing`,
         description: category.description
       };
@@ -54,9 +57,20 @@ function SEO() {
     const serviceId = serviceMatch[1];
     const service = SERVICES.find(s => s.id === serviceId);
     if (service) {
-      categorySeo = {
-        title: `${service.name} | Bryan's Showroom Quality Detailing`,
-        description: service.description
+      pageSeo = {
+        title: service.seo.title,
+        description: service.seo.description
+      };
+    }
+  }
+
+  if (cityMatch) {
+    const citySlug = cityMatch[1];
+    const city = CITIES.find(c => c.slug === citySlug);
+    if (city) {
+      pageSeo = {
+        title: city.seo.title,
+        description: city.seo.description
       };
     }
   }
@@ -79,12 +93,12 @@ function SEO() {
       description: "See the difference professional detailing makes. Browse our gallery of paint corrections and interior restorations in the Omaha area."
     },
     '/membership': {
-      title: "Maintenance Plans | Keep Your Car Showroom Ready",
-      description: "Join our exclusive maintenance club for monthly detailing at discounted rates. Keep your vehicle protected year-round."
+      title: "Maintenance Detailing | Keep Your Car Showroom Ready",
+      description: "Join our exclusive maintenance club for bi-weekly or monthly detailing at discounted rates. Keep your vehicle protected year-round."
     },
   };
 
-  const current = categorySeo || seoData[pathname] || {
+  const current = pageSeo || seoData[pathname] || {
     title: "Bryan's Showroom Quality Detailing",
     description: "Premium professional auto detailing services in Bellevue and Omaha, Nebraska."
   };
@@ -148,7 +162,7 @@ function SEO() {
           "@type": "Offer",
           "itemOffered": {
             "@type": "Service",
-            "name": "Interior Restoration",
+            "name": "Interior Detailing",
             "description": "Deep cleaning and sanitization for vehicle interiors."
           }
         }
@@ -216,6 +230,7 @@ export default function App() {
                 <Route path="/services" element={<Services />} />
                 <Route path="/services/:slug" element={<CategoryDetail />} />
                 <Route path="/services/detail/:serviceId" element={<ServiceDetail />} />
+                <Route path="/areas/:slug" element={<CityDetail />} />
                 <Route path="/membership" element={<Membership />} />
                 <Route path="/gift-cards" element={<GiftCards />} />
                 <Route path="/gallery" element={<Gallery />} />
