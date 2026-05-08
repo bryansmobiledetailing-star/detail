@@ -211,10 +211,10 @@ export default function DetailingQuiz() {
 
               <div className="flex flex-col gap-3">
                 <Button className="w-full h-16 text-lg font-bold shadow-xl shadow-emerald-100 bg-zinc-900 hover:bg-zinc-800" asChild>
-                  <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">
+                  <Link to="/book">
                     Secure This Estimate Now
                     <ChevronRight className="ml-2 h-5 w-5" />
-                  </a>
+                  </Link>
                 </Button>
                 <Button variant="outline" className="w-full h-12 text-zinc-500" onClick={() => {
                   setStep(0);
@@ -228,35 +228,6 @@ export default function DetailingQuiz() {
           )}
         </AnimatePresence>
       </div>
-
-      {isFinished && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-zinc-900 rounded-[2.5rem] p-8 md:p-12 text-white border border-zinc-800 shadow-2xl relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 p-6">
-            <Sparkles className="h-24 w-24 text-emerald-500/10" />
-          </div>
-          
-          <div className="relative z-10 space-y-6 text-center md:text-left">
-            <div className="space-y-2">
-              <h3 className="text-3xl font-black italic">Wait! We can get even more precise.</h3>
-              <p className="text-zinc-400 max-w-md mx-auto md:mx-0">
-                Our AI Vision system can analyze your vehicle's specific surface condition from a photo for a technical assessment.
-              </p>
-            </div>
-            
-            <Button className="bg-white text-zinc-950 hover:bg-zinc-200 h-14 px-8 text-lg font-bold gap-2" asChild>
-              <Link to="/quote">
-                <Camera className="h-5 w-5" />
-                Upload Photo for AI Review
-              </Link>
-            </Button>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }

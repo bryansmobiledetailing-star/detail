@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { Helmet } from "react-helmet-async";
 import {
   CheckCircle2,
   ArrowLeft,
@@ -15,6 +16,8 @@ import {
   Info,
   AlertTriangle,
   Lightbulb,
+  Plus,
+  ArrowUpRight,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
@@ -22,9 +25,11 @@ import {
   CATEGORIES,
   VEHICLE_SIZES,
   SPECIALTY_SIZES,
+  ADD_ONS,
   type Service,
 } from "../data/services";
 import { BOOKING_LINK } from "../lib/constants";
+import BeforeAfterSlider from "../components/BeforeAfterSlider";
 
 export default function ServiceDetail() {
   const { serviceId } = useParams<{ serviceId: string }>();
@@ -34,18 +39,7 @@ export default function ServiceDetail() {
     : null;
 
   React.useEffect(() => {
-    if (service) {
-      document.title = service.seo.title;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', service.seo.description);
-      } else {
-        const desc = document.createElement('meta');
-        desc.name = "description";
-        desc.content = service.seo.description;
-        document.head.appendChild(desc);
-      }
-    }
+    window.scrollTo(0, 0);
   }, [service]);
 
   const allSizes = [...VEHICLE_SIZES, ...SPECIALTY_SIZES];
@@ -74,8 +68,30 @@ export default function ServiceDetail() {
     );
   }
 
+  // Get suggested add-ons (first 3)
+  const suggestedAddOns = ADD_ONS.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-zinc-50">
+      <Helmet>
+        <title>{service.seo.title}</title>
+        <meta name="description" content={service.seo.description} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "name": service.name,
+            "description": service.longDescription,
+            "provider": {
+              "@type": "AutoBodyShop",
+              "name": "Bryan's Showroom Quality Detailing",
+              "image": "https://images.unsplash.com/photo-1552930294-6b595f4c2974?auto=format&fit=crop&q=80&w=1200"
+            },
+            "url": `https://bryansdetailing.com/services/detail/${service.id}`
+          })}
+        </script>
+      </Helmet>
+      
       {/* Dynamic Header */}
       <div className="bg-white border-b border-zinc-200">
         <div className="container mx-auto px-4 py-6">
@@ -114,9 +130,9 @@ export default function ServiceDetail() {
                 {service.badge && (
                   <span
                     className={`inline-block px-4 py-1.5 rounded-full text-[10px] font-black tracking-[0.2em] uppercase ${
-                      service.badge === "Most Popular"
+                      ["Most Popular", "Best Value", "Popular Choice"].includes(service.badge)
                         ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
-                        : service.badge === "Top Choice"
+                        : service.badge === "Top Choice" || service.badge === "Deep Restoration"
                           ? "bg-amber-400 text-black shadow-lg shadow-amber-400/20"
                           : "bg-zinc-100 text-zinc-800 border border-zinc-200"
                     }`}
@@ -170,30 +186,17 @@ export default function ServiceDetail() {
                     className="flex items-center gap-3"
                   >
                     <Calendar className="h-5 w-5" />
-                    Book Securely
+                    Configure & Book
                   </Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-16 px-12 text-lg font-black uppercase tracking-widest rounded-2xl border-zinc-200 hover:bg-zinc-50 transition-all"
+                  className="h-16 px-12 text-lg font-black uppercase tracking-widest rounded-2xl border-zinc-200 hover:bg-zinc-50 transition-all font-bold"
                   asChild
                 >
-                  <Link to="/quote">Get Custom Quote</Link>
+                  <Link to="/quote">Custom Quote</Link>
                 </Button>
-                {SERVICES.filter((s) => s.categoryId === category.id).length >
-                  1 && (
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="h-16 px-8 text-sm font-black uppercase tracking-widest rounded-2xl transition-all"
-                    asChild
-                  >
-                    <Link to={`/services/${category.slug}`}>
-                      Compare Packages
-                    </Link>
-                  </Button>
-                )}
               </div>
             </motion.div>
 
@@ -203,13 +206,16 @@ export default function ServiceDetail() {
               transition={{ delay: 0.2 }}
               className="relative"
             >
-              <div className="aspect-[4/3] rounded-[3rem] overflow-hidden shadow-2xl relative z-10 border-[12px] border-white">
+              <div className="aspect-[4/3] rounded-[3rem] overflow-hidden shadow-2xl relative z-10 border-[12px] border-white group">
                 <img
                   src={service.image || category.image}
                   alt={service.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-10">
+                   <p className="text-white font-bold tracking-tight italic">Professional {service.name} in Bellevue, NE.</p>
+                </div>
               </div>
               {/* Abstract decorative elements */}
               <div className="absolute -top-12 -right-12 w-64 h-64 bg-emerald-100/50 rounded-full filter blur-3xl opacity-60 mix-blend-multiply" />
@@ -219,31 +225,64 @@ export default function ServiceDetail() {
         </div>
       </section>
 
+      {/* Visual Proof Section */}
+      <section className="py-24 bg-zinc-900 overflow-hidden">
+        <div className="container mx-auto px-4">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              <div className="space-y-8">
+                 <div className="space-y-4">
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400">Visual Results</span>
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none">The <span className="italic text-zinc-500 font-normal">Showroom</span> Standard.</h2>
+                 </div>
+                 <p className="text-zinc-400 text-lg font-medium leading-relaxed max-w-md">
+                    No magic tricks. Just technical cleaning, proper machine polishing, and industrial-grade protection. Slide to see the difference for yourself.
+                 </p>
+                 <div className="grid grid-cols-2 gap-8 pt-8">
+                    <div className="space-y-2">
+                       <p className="text-3xl font-black text-white tracking-tighter">100%</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Satisfaction Rate</p>
+                    </div>
+                    <div className="space-y-2">
+                       <p className="text-3xl font-black text-white tracking-tighter">5.0</p>
+                       <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Google Rating</p>
+                    </div>
+                 </div>
+              </div>
+              <div className="relative">
+                 <BeforeAfterSlider 
+                    beforeImage="https://images.unsplash.com/photo-1507136566006-bb91e5088c97?auto=format&fit=crop&q=80&w=1200" 
+                    afterImage="https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200" 
+                 />
+                 <div className="absolute -bottom-6 -right-6 bg-emerald-500 text-white p-6 rounded-3xl shadow-xl shadow-emerald-500/20 z-20">
+                    <Sparkles className="h-6 w-6" />
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
       {/* Pricing & Selection Section */}
       <section className="py-24 bg-zinc-50">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-16">
-            <div className="lg:w-2/3 space-y-12">
+            <div className="lg:w-2/3 space-y-20">
               <div className="space-y-8">
                 <div className="flex items-center gap-4">
-                  <div className="h-px flex-grow bg-zinc-200" />
-                  <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
-                    Pricing Matrix
-                  </span>
+                  <h2 className="text-3xl font-black tracking-tight text-zinc-900 italic uppercase">Pricing Matrix</h2>
                   <div className="h-px flex-grow bg-zinc-200" />
                 </div>
 
-                <div className="overflow-hidden rounded-[2rem] border border-zinc-100 bg-white shadow-sm overflow-x-auto">
+                <div className="overflow-hidden rounded-[2.5rem] border border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-zinc-50/50 border-b border-zinc-100">
-                        <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-zinc-400">
+                      <tr className="bg-zinc-50 border-b border-zinc-100">
+                        <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-400">
                           Vehicle Size
                         </th>
-                        <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-zinc-400">
+                        <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-400">
                           Est. Duration
                         </th>
-                        <th className="px-6 py-5 text-xs font-black uppercase tracking-widest text-zinc-400 text-right">
+                        <th className="px-8 py-6 text-xs font-black uppercase tracking-widest text-zinc-400 text-right">
                           Base Investment
                         </th>
                       </tr>
@@ -256,29 +295,29 @@ export default function ServiceDetail() {
                         return (
                           <tr
                             key={slug}
-                            className="group hover:bg-zinc-50/50 transition-colors"
+                            className="group hover:bg-zinc-50/50 transition-all duration-300"
                           >
-                            <td className="px-6 py-5">
+                            <td className="px-8 py-6">
                               <div className="flex items-center gap-4">
-                                <span className="text-2xl grayscale group-hover:grayscale-0 transition-all leading-none">
+                                <span className="text-3xl grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all leading-none duration-500">
                                   {sizeInfo.icon}
                                 </span>
-                                <span className="text-sm font-bold text-zinc-900">
+                                <span className="text-base font-black text-zinc-900">
                                   {sizeInfo.name}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-6 py-5">
-                              <div className="flex items-center gap-2 text-sm font-semibold text-zinc-500">
-                                <Clock className="h-3.5 w-3.5" />
+                            <td className="px-8 py-6">
+                              <div className="flex items-center gap-3 text-sm font-bold text-zinc-500">
+                                <Clock className="h-4 w-4 text-zinc-300" />
                                 {typeof service.duration === "string" 
                                   ? service.duration 
                                   : service.duration[slug] || 'Custom'}
                               </div>
                             </td>
-                            <td className="px-6 py-5 text-right">
-                              <span className="text-xl font-black text-zinc-900">
-                                ${price}
+                            <td className="px-8 py-6 text-right">
+                              <span className="text-2xl font-black text-zinc-900">
+                                ${price}{service.pricingType === 'variable' && <span className="text-xs font-medium text-zinc-400">/ft</span>}
                               </span>
                             </td>
                           </tr>
@@ -286,160 +325,138 @@ export default function ServiceDetail() {
                       })}
                     </tbody>
                   </table>
-                  <div className="bg-zinc-50/50 p-4 border-t border-zinc-100 text-center">
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                      <Info className="h-3 w-3" />
-                      Final quote provided upon vehicle inspection
-                    </p>
+                  <div className="bg-zinc-50 p-6 border-t border-zinc-100 flex items-center justify-between">
+                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-2">
+                        <Info className="h-4 w-4" />
+                        Final quote provided upon on-site inspection
+                     </p>
+                     <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">Secure Booking Active</p>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-12">
                 <div className="flex items-center gap-4">
-                  <div className="h-px flex-grow bg-zinc-200" />
-                  <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
-                    Restoration Depth
-                  </span>
+                  <h2 className="text-3xl font-black tracking-tight text-zinc-900 italic uppercase">The Process</h2>
                   <div className="h-px flex-grow bg-zinc-200" />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                   {service.features.map((feature, i) => (
-                    <div key={i} className="flex gap-4 group">
-                      <div className="w-6 h-6 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 mt-1">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    <motion.div 
+                      key={i} 
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="flex gap-4 group"
+                    >
+                      <div className="w-8 h-8 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-500 group-hover:border-emerald-500 transition-all duration-300">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 group-hover:text-white transition-colors" />
                       </div>
-                      <span className="text-base font-semibold text-zinc-700 leading-relaxed group-hover:text-zinc-900 transition-colors">
+                      <span className="text-base font-bold text-zinc-700 leading-tight group-hover:text-zinc-950 transition-colors pt-1">
                         {feature}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
 
-              {/* Scope & Recommendations Section */}
-              {service.bestFor && (
-                <div className="space-y-8 pt-8 border-t border-zinc-100">
-                  <div className="flex items-center gap-4">
+              {/* suggested add-ons (Cross-sell) */}
+              <div className="space-y-12 pt-12 border-t border-zinc-200">
+                 <div className="flex items-center gap-4">
+                    <h2 className="text-3xl font-black tracking-tight text-zinc-900 italic uppercase">Recommended Upgrades</h2>
                     <div className="h-px flex-grow bg-zinc-200" />
-                    <span className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">
-                      Scope & Recommendations
-                    </span>
-                    <div className="h-px flex-grow bg-zinc-200" />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {service.bestFor && (
-                      <div className="p-8 rounded-[2.5rem] bg-zinc-900 text-white relative overflow-hidden group border border-zinc-800 flex flex-col justify-between shadow-xl">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
-                          <Sparkles className="h-20 w-20" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-400 mb-4 italic flex items-center gap-2">
-                            <CheckCircle2 className="h-3 w-3" />
-                            Perfect Match For
-                          </p>
-                          <p className="text-xl font-black italic tracking-tighter leading-tight relative z-10">
-                            {service.bestFor}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {suggestedAddOns.map((addon) => (
+                       <div key={addon.id} className="p-6 rounded-[2rem] bg-white border border-zinc-100 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all duration-300 group">
+                          <div className="flex justify-between items-start mb-4">
+                             <div className="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+                                <Plus className="h-5 w-5 text-zinc-400 group-hover:text-emerald-500" />
+                             </div>
+                             <span className="text-xl font-black text-zinc-900">${addon.price}</span>
+                          </div>
+                          <h4 className="font-black text-zinc-900 mb-2 truncate">{addon.name}</h4>
+                          <p className="text-xs text-zinc-500 font-medium leading-relaxed mb-4 line-clamp-2">{addon.description}</p>
+                          <Link to="/book" className="text-[10px] font-black uppercase tracking-widest text-emerald-600 flex items-center gap-1 group-hover:gap-2 transition-all">
+                             Add in Booking
+                             <ArrowRight className="h-3 w-3" />
+                          </Link>
+                       </div>
+                    ))}
+                 </div>
+              </div>
             </div>
 
-            <aside className="lg:w-1/3 space-y-6">
-              <div className="bg-white p-8 rounded-[2.5rem] border border-zinc-100 shadow-sm sticky top-32">
-                <div className="flex items-center gap-3 mb-6">
-                  <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                  <h3 className="text-lg font-black tracking-tight text-zinc-900">
-                    Service Standards
+            <aside className="lg:w-1/3 space-y-8">
+              <div className="bg-zinc-900 p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group sticky top-32">
+                <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                   <ShieldCheck className="h-48 w-48" />
+                </div>
+                
+                <div className="flex items-center gap-3 mb-8 relative z-10">
+                  <ShieldCheck className="h-6 w-6 text-emerald-400" />
+                  <h3 className="text-xl font-black tracking-tight uppercase italic">
+                    The Promise
                   </h3>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-xs font-bold text-zinc-500 p-3 bg-zinc-50 rounded-xl">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                      Bellevue & Omaha Service area
-                    </div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-zinc-500 p-3 bg-zinc-50 rounded-xl">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                      Secure Drop-off environment
-                    </div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-zinc-500 p-3 bg-zinc-50 rounded-xl">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                      Advanced chemical decontamination
-                    </div>
-                    <div className="flex items-center gap-3 text-xs font-bold text-zinc-500 p-3 bg-zinc-50 rounded-xl">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                      100% Satisfaction Guarantee
-                    </div>
+                <div className="space-y-6 relative z-10">
+                  <div className="space-y-3">
+                    {[
+                      "Technical Decontamination Included",
+                      "pH-Neutral Chemical Selection",
+                      "Industrial Grade UV Protection",
+                      "100% Satisfaction Guarantee",
+                      "Fully Insured Professional Service"
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-4 text-xs font-bold text-zinc-300 bg-white/5 p-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-colors">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+                        {item}
+                      </div>
+                    ))}
                   </div>
 
-                  <div className="pt-6 border-t border-zinc-100 italic text-[10px] text-zinc-400 font-medium">
-                    * All times are estimates based on standard vehicle
-                    condition.
+                  <div className="pt-8 border-t border-white/10">
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-6 leading-relaxed">
+                      * Most standard condition vehicles fit these price points. Heavy dirt or specialty needs may require adjusted quotes.
+                    </p>
+                    <Button className="w-full h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs" asChild>
+                       <Link to="/book" className="flex items-center gap-2">
+                          Start Reservation
+                          <ArrowUpRight className="h-4 w-4" />
+                       </Link>
+                    </Button>
                   </div>
                 </div>
               </div>
+
+              {service.bestFor && (
+                <div className="p-8 rounded-[2.5rem] bg-amber-50 border border-amber-100 shadow-sm">
+                   <p className="text-[10px] font-black uppercase tracking-widest text-amber-600 mb-4 flex items-center gap-2">
+                       <Sparkles className="h-3 w-3" />
+                       Who it's for
+                   </p>
+                   <p className="text-lg font-black italic tracking-tighter text-amber-900 leading-tight">
+                       {service.bestFor}
+                   </p>
+                </div>
+              )}
             </aside>
           </div>
         </div>
       </section>
 
-      {/* Trust Elements */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mx-auto border border-zinc-100 shadow-sm">
-                <ShieldCheck className="h-8 w-8 text-zinc-900" />
-              </div>
-              <h4 className="text-lg font-black tracking-tight">
-                Full Licensed
-              </h4>
-              <p className="text-sm text-zinc-500 font-medium">
-                100% insured for your peace of mind and vehicle safety.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mx-auto border border-zinc-100 shadow-sm">
-                <Car className="h-8 w-8 text-zinc-900" />
-              </div>
-              <h4 className="text-lg font-black tracking-tight">
-                Technical Prep
-              </h4>
-              <p className="text-sm text-zinc-500 font-medium">
-                Advanced decontamination techniques included in every detail.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mx-auto border border-zinc-100 shadow-sm">
-                <MapPin className="h-8 w-8 text-zinc-900" />
-              </div>
-              <h4 className="text-lg font-black tracking-tight">Bellevue HQ</h4>
-              <p className="text-sm text-zinc-500 font-medium">
-                Secure brick-and-mortar location for precision detailing.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Related Services */}
-      <section className="py-24 bg-zinc-50 border-t border-zinc-100">
+      <section className="py-24 bg-white border-t border-zinc-100">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-3xl font-black tracking-tight text-zinc-900">
-              Explore Other Packages
+          <div className="flex items-center justify-between mb-16">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-zinc-900 leading-none">
+              Explore <span className="italic text-zinc-400 font-normal">Other</span> Packages
             </h2>
-            <Button variant="ghost" asChild className="gap-2">
+            <Button variant="ghost" asChild className="gap-2 font-bold uppercase tracking-widest text-xs">
               <Link to="/services">
-                View All <ArrowRight className="h-4 w-4" />
+                View Catalog <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
@@ -453,22 +470,27 @@ export default function ServiceDetail() {
                 <Link
                   key={relService.id}
                   to={`/services/detail/${relService.id}`}
-                  className="group bg-white p-8 rounded-[2rem] border border-zinc-100 shadow-sm hover:shadow-md hover:border-zinc-200 transition-all flex flex-col"
+                  className="group bg-white p-10 rounded-[2.5rem] border border-zinc-100 shadow-xl shadow-zinc-200/20 hover:shadow-2xl hover:translate-y-[-8px] transition-all duration-500 flex flex-col"
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-zinc-900 group-hover:text-emerald-600 transition-colors">
-                      {relService.name.split(" (")[0].split(" -")[0]}
-                    </h3>
-                    <ChevronRight className="h-5 w-5 text-zinc-300 group-hover:text-zinc-900 translate-x-0 group-hover:translate-x-1 transition-all" />
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">{category.name}</span>
+                        <h3 className="text-2xl font-black tracking-tighter text-zinc-900 group-hover:text-emerald-600 transition-colors">
+                        {relService.name.split(" (")[0].split(" -")[0]}
+                        </h3>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center group-hover:bg-zinc-900 group-hover:text-white transition-all duration-500">
+                        <ArrowRight className="h-5 w-5" />
+                    </div>
                   </div>
-                  <p className="text-sm text-zinc-500 font-medium line-clamp-2 mb-6">
+                  <p className="text-sm text-zinc-500 font-medium leading-relaxed mb-8 line-clamp-2">
                     {relService.shortDescription}
                   </p>
-                  <div className="mt-auto pt-6 border-t border-zinc-50 flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  <div className="mt-auto pt-8 border-t border-zinc-50 flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                       Starting at
                     </span>
-                    <span className="text-lg font-black text-zinc-900">
+                    <span className="text-2xl font-black text-zinc-900">
                       $
                       {relService.isSpecialty
                         ? relService.price.rv
@@ -481,43 +503,16 @@ export default function ServiceDetail() {
         </div>
       </section>
 
-      {/* CTA Footer */}
-      <section className="py-24 bg-zinc-900 text-white">
-        <div className="container mx-auto px-4 max-w-4xl text-center space-y-12">
-          <div className="space-y-6">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
-              Ready for the <span className="text-emerald-400">Showroom</span>{" "}
-              Finish?
-            </h2>
-            <p className="text-xl text-zinc-400 font-medium max-w-2xl mx-auto">
-              Choose your vehicle size and secure your date. Our professional
-              detailing shop in Bellevue handles the rest.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Button
-              size="lg"
-              className="h-16 px-12 text-lg font-black uppercase tracking-widest bg-white text-zinc-950 hover:bg-zinc-200"
-              asChild
-            >
-              <Link to={`/book?serviceId=${service.id}`}>
-                Configure & Book Now
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-16 px-12 text-lg font-black uppercase tracking-widest border-zinc-700 hover:bg-zinc-800 text-white"
-              asChild
-            >
-              <Link to="/services">Compare Others</Link>
-            </Button>
-          </div>
-          <p className="text-zinc-500 text-sm font-bold tracking-widest uppercase">
-            5.0 Rated Professional Detailing in Omaha Area
-          </p>
-        </div>
-      </section>
+      {/* Sticky Bottom Booking Bar for Mobile */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t border-zinc-200 z-50 lg:hidden flex items-center justify-between gap-4">
+         <div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Total Refresh</p>
+            <p className="text-xl font-black text-zinc-900">${service.price.car || Object.values(service.price)[0]}</p>
+         </div>
+         <Button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-xs bg-zinc-900 text-white shrink-0" asChild>
+            <Link to={`/book?serviceId=${service.id}`}>Book Now</Link>
+         </Button>
+      </div>
     </div>
   );
 }

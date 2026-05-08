@@ -3,6 +3,7 @@ import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getSquareClient, getSquareLocationId } from './square';
 import { randomUUID } from 'crypto';
+import { logToSystem, logSquareError, LogLevel } from './errorLogger';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize Firebase Admin if not already initialized
@@ -149,20 +150,30 @@ export async function syncServiceToSquare(serviceId: string, accessToken?: strin
   } catch (error: any) {
     console.error(`❌ Sync Engine Failure [${serviceId}]:`, error);
     
+    // Detailed Square Error Parsing
+    let userFriendlyError = error.message;
+    if (error.errors && error.errors[0]) {
+      const code = error.errors[0].code;
+      if (code === 'UNAUTHORIZED') {
+        userFriendlyError = 'Invalid Square Access Token. Please update it in the Admin Setup Wizard.';
+      } else if (code === 'FORBIDDEN') {
+        userFriendlyError = 'Permission Denied in Square. Ensure your token has "Catalog Write" permissions.';
+      } else if (code === 'NOT_FOUND') {
+        userFriendlyError = 'The requested Square resource was not found. It might have been deleted manually.';
+      }
+    }
+
     await db.collection('services').doc(serviceId).update({
       syncStatus: 'mismatch',
-      syncError: error.message
+      syncError: userFriendlyError,
+      lastSyncAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    await db.collection('sync_logs').add({
-      serviceId,
-      action: 'update',
-      status: 'failed',
-      error: error.message,
-      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    await logSquareError('SquareSyncEngine', `Individual Sync failed for ${serviceId}`, error, {
+      path: `services/${serviceId}`
     });
 
-    return { success: false, error: error.message };
+    return { success: false, error: userFriendlyError };
   }
 }
 

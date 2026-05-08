@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import { ChevronDown, HelpCircle, Loader2 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 
 const DEFAULT_FAQS = [
   {
-    question: 'How long does detailing take?',
-    answer: 'The time required depends on the service package and the condition of your vehicle. An Essential Interior Detail typically takes 1.5 - 2.5 hours, while a Signature Full Detail can take 4 - 6 hours. Paint Correction and Ceramic Coating services may require your vehicle for 1 to 3 days to ensure proper curing and perfection.',
+    question: 'How long does auto detailing take?',
+    answer: 'The time required depends on the auto detailing service package and the condition of your vehicle. An Essential Interior Detail typically takes 1.5 - 2.5 hours, while a Full Car Detailing Package can take 4 - 6 hours. Paint Correction and Ceramic Coating services may require your vehicle for 1 to 3 days to ensure proper curing and perfection.',
     order: 1
   },
   {
-    question: 'What is your rain or weather policy?',
-    answer: 'For mobile detailing, your appointment is weather-dependent. If rain, snow, or extreme temperatures are forecasted, we will contact you at least 24 hours in advance to reschedule. If you have a garage or covered area, we can often still perform interior services or minor exterior work.',
+    question: 'What is your rain or weather policy for mobile detailing?',
+    answer: 'For mobile car detailing, your appointment is weather-dependent. If rain, snow, or extreme temperatures are forecasted, we will contact you at least 24 hours in advance to reschedule. If you have a garage or covered area, we can often still perform interior detailing or minor exterior car wash services.',
     order: 2
   },
   {
-    question: 'Do I need to provide water or electricity for mobile services?',
-    answer: 'We are fully self-contained! We bring our own professional-grade spot-free water and silent power generators. As long as we have enough space to park our van near your vehicle, we don\'t need to plug into your home.',
+    question: 'Do I need to provide water or electricity for mobile detailing?',
+    answer: 'No! For our mobile auto detailing, we are fully self-contained. We bring our own professional-grade spot-free water and silent power generators. As long as we have enough space to park our van near your vehicle, we don\'t need to plug into your home to complete your car detailing service.',
     order: 3
   }
 ];
@@ -64,16 +65,38 @@ export default function FAQ() {
      );
   }
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 py-16">
+      <Helmet>
+        <title>Frequently Asked Questions | Auto Detailing Bellevue & Omaha</title>
+        <meta name="description" content="Find answers to common questions about our auto detailing services, mobile car detailing, ceramic coating, and paint correction processes." />
+        {faqs.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify(faqSchema)}
+          </script>
+        )}
+      </Helmet>
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="text-center mb-16 space-y-4">
           <div className="mx-auto w-16 h-16 bg-zinc-100 text-zinc-900 rounded-full flex items-center justify-center mb-6">
             <HelpCircle className="h-8 w-8" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900">Frequently Asked Questions</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900">Auto Detailing FAQ</h1>
           <p className="text-lg text-zinc-600">
-            Everything you need to know about our services, processes, and policies.
+            Everything you need to know about our car detailing services, paint correction processes, and ceramic coating policies for Bellevue and Omaha.
           </p>
         </div>
 

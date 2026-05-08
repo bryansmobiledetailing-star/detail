@@ -6,6 +6,7 @@ import multer from "multer";
 import nodemailer from "nodemailer";
 import { SERVICES, CATEGORIES, VEHICLE_SIZES, SPECIALTY_SIZES, ADD_ONS } from "./src/data/services.ts";
 import { syncServiceToSquare, deleteServiceFromSquare, autoCorrectCatalogDrift, syncAllFirestoreToSquare } from "./src/services/squareSyncEngine.ts";
+import { logToSystem, logSquareError, LogLevel } from "./src/services/errorLogger.ts";
 import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import firebaseConfig from './firebase-applet-config.json';
@@ -498,9 +499,20 @@ async function startServer() {
         success: true, 
         message: `Sync & Prune Complete. Updated ${syncedCount} items, Removed ${toDeleteIds.length} extras.${masterSyncMsg}` 
       });
+      
+      await logToSystem({
+        level: LogLevel.INFO,
+        source: 'SquareSync',
+        message: 'Manual Square Sync completed successfully',
+        details: { syncedCount, prunedCount: toDeleteIds.length, masterSyncMsg }
+      });
     } catch (error: any) {
       console.error("Sync Error:", error);
-      res.status(500).json({ error: error.message || "Sync failed" });
+      await logSquareError('SquareSync', 'Manual Square Sync failed', error);
+      res.status(500).json({ 
+        error: "Square Synchronization failed. Please check your Access Token and Location ID in the Setup Wizard.",
+        details: error.message 
+      });
     }
   });
   app.post("/api/admin/remove-all-duplicates", async (req, res) => {
@@ -827,6 +839,23 @@ async function startServer() {
     } catch (error: any) {
       console.error("Google Reviews Error:", error);
       res.status(500).json({ error: error.message || "Failed to fetch reviews" });
+    }
+  });
+
+  // Admin Logs Endpoint
+  app.get("/api/admin/logs", async (req, res) => {
+    try {
+      const { limit = 30 } = req.query;
+      const snapshot = await db.collection('system_logs')
+        .orderBy('timestamp', 'desc')
+        .limit(Number(limit))
+        .get();
+      
+      const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      res.json(logs);
+    } catch (error: any) {
+      console.error("Failed to fetch logs:", error);
+      res.status(500).json({ error: "Failed to fetch logs" });
     }
   });
 

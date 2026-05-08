@@ -3,13 +3,23 @@ import { SERVICES } from "../data/services";
 import { RecommendationResult } from "../types";
 import { getGeminiKey } from "../lib/config";
 
-const ai = new GoogleGenAI({ 
-  apiKey: getGeminiKey() || (process.env.GEMINI_API_KEY as string) 
-});
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const key = getGeminiKey() || (process.env.GEMINI_API_KEY as string);
+    if (!key) {
+      throw new Error("GEMINI_API_KEY_MISSING");
+    }
+    aiInstance = new GoogleGenAI(key);
+  }
+  return aiInstance;
+}
 
 export async function analyzeVehicleImage(base64Image: string): Promise<RecommendationResult> {
   const model = "gemini-flash-latest";
   
+  const ai = getAI();
   const systemInstruction = `
     You are an expert auto detailer assistant for Bryan's Showroom Quality Detailing.
     Analyze the provided vehicle image and identify its condition and visible issues.
@@ -35,10 +45,11 @@ export async function analyzeVehicleImage(base64Image: string): Promise<Recommen
     - If wheels are heavily brake-dusted, suggest "Wheel Barrel Clean".
 
     Output valid JSON only according to the schema provided.
+    Provide a clear, brief explanation (reasoning) for why the specific service is recommended based on the user's vehicle condition.
     Be decisive and professional.
   `;
 
-  const prompt = "Analyze this vehicle image. Determine if the condition is Light, Moderate, or Severe. Identify visible issues and recommend the most effective service and potential upsells.";
+  const prompt = "Analyze this vehicle image. Determine if the condition is Light, Moderate, or Severe. Identify visible issues and recommend the most effective service, give a reasoning for why this service was chosen for this condition, and provide potential upsells.";
 
   const responseSchema = {
     type: Type.OBJECT,
@@ -50,9 +61,10 @@ export async function analyzeVehicleImage(base64Image: string): Promise<Recommen
         type: Type.OBJECT,
         properties: {
           name: { type: Type.STRING },
-          id: { type: Type.STRING, description: "The ID of the service from the provided list" }
+          id: { type: Type.STRING, description: "The ID of the service from the provided list" },
+          reasoning: { type: Type.STRING, description: "Detailed explanation of why this specific service is the best fit for the vehicle's condition." }
         },
-        required: ["name", "id"]
+        required: ["name", "id", "reasoning"]
       },
       estimated_price_range: {
         type: Type.OBJECT,
@@ -114,6 +126,7 @@ export async function analyzeVehicleImage(base64Image: string): Promise<Recommen
       condition: data.vehicle_condition as any,
       service: {
         name: matchedService.name,
+        reasoning: data.recommended_service.reasoning,
         priceRange: {
           min: Math.max(data.estimated_price_range?.min || serviceMin, serviceMin),
           max: Math.min(data.estimated_price_range?.max || serviceMax, serviceMax)

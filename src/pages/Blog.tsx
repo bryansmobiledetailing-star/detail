@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Calendar, 
   Clock, 
@@ -68,6 +69,10 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-zinc-50 pt-32 pb-24">
+      <Helmet>
+        <title>Auto Detailing Blog | Bryan's Showroom Quality</title>
+        <meta name="description" content="Pro auto detailing tips, maintenance guides, and inside looks at the world of showroom-quality detailing. Serving Bellevue and Omaha, NE." />
+      </Helmet>
       {/* Hero Section */}
       <section className="container mx-auto px-4 mb-20">
         <div className="max-w-4xl">

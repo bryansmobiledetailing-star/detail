@@ -54,7 +54,7 @@ export default function Membership() {
             </div>
 
             <Button className="w-full h-12 rounded-xl" asChild>
-              <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">Join Monthly</a>
+              <Link to="/book">Join Monthly</Link>
             </Button>
           </div>
 
@@ -99,8 +99,8 @@ export default function Membership() {
               ))}
             </div>
 
-            <Button className="w-full h-12 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200" asChild>
-              <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">Join The Club</a>
+            <Button className="w-full h-12 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 shadow-xl shadow-zinc-950/50" asChild>
+              <Link to="/book">Join The Club</Link>
             </Button>
           </div>
 
@@ -141,7 +141,7 @@ export default function Membership() {
             </div>
 
             <Button className="w-full h-12 rounded-xl" asChild>
-              <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">Join Seasonal</a>
+              <Link to="/book">Join Seasonal</Link>
             </Button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { 
   Calendar, 
   ChevronRight, 
@@ -12,10 +13,11 @@ import {
   Mail,
   User,
   Info,
-  CreditCard as CardIcon
+  CreditCard as CardIcon,
+  Star
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { VEHICLE_SIZES, SPECIALTY_SIZES, SERVICES } from '../data/services';
+import { VEHICLE_SIZES, SPECIALTY_SIZES, SERVICES, CATEGORIES } from '../data/services';
 import { format, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isBefore, startOfToday, parseISO } from 'date-fns';
 import { getSquareHeaders, getSquareAppId, getSquareLocationId } from '../lib/config';
 import { PaymentForm, CreditCard } from 'react-square-web-payments-sdk';
@@ -77,6 +79,8 @@ export default function Booking() {
   // Calendar state
   const [viewDate, setViewDate] = useState(new Date());
 
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -85,10 +89,11 @@ export default function Booking() {
     if (services.length > 0 && preSelectedServiceId && !selectedService) {
       const localService = SERVICES.find(s => s.id === preSelectedServiceId);
       if (localService) {
-        const baseName = localService.name.split(' (')[0].toLowerCase();
-        const matched = services.find(s => s.name.toLowerCase().includes(baseName));
+        const targetName = (localService.squareName || localService.name.split(' (')[0]).toLowerCase();
+        const matched = services.find(s => s.name.toLowerCase().includes(targetName));
         if (matched) {
           setSelectedService(matched);
+          setSelectedCategory(localService.categoryId);
           setStep('size');
         }
       }
@@ -98,16 +103,12 @@ export default function Booking() {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const [svcRes, catRes] = await Promise.all([
-        fetch('/api/catalog/services', { headers: getSquareHeaders() }),
-        fetch('/src/data/services.ts').then(() => {
-          // Categories are static in our data file, but we can also infer from services
-          return null;
-        })
-      ]);
-      
-      const data = await svcRes.json();
+      const res = await fetch('/api/catalog/services', { headers: getSquareHeaders() });
+      const data = await res.json();
       setServices(data);
+      
+      // Default to "Full Detailing" or first category
+      setSelectedCategory('full-detailing');
     } catch (err) {
       setError('Failed to load services. Please check your connection.');
     } finally {
@@ -116,10 +117,23 @@ export default function Booking() {
   };
 
   const mainServices = services.filter(s => {
-    // Exclude add-ons by looking at categoryId or name
     const category = s.categoryId ? s.categoryId.toLowerCase() : '';
     const name = s.name.toLowerCase();
-    return !category.includes('add-on') && !name.includes('add-on');
+    const isAddon = category.includes('add-on') || name.includes('add-on');
+    
+    if (isAddon) return false;
+    
+    // Only filter by category if one is selected
+    if (selectedCategory) {
+      // Map Square category names to our local category IDs if possible
+      // For now, we'll try to find any match either in description or name
+      const localCat = CATEGORIES.find(c => c.id === selectedCategory);
+      if (localCat) {
+        const catName = localCat.name.toLowerCase().replace(' detailing', '').trim();
+        return name.includes(catName) || category.includes(catName);
+      }
+    }
+    return true;
   });
 
   const availableAddons = services.filter(s => {
@@ -251,16 +265,31 @@ export default function Booking() {
     else if (step === 'payment') setStep('details');
   };
 
-  const totalPrice = () => {
-    if (!selectedService || !selectedSize) return 0;
-    const base = selectedService.variations.find(v => v.name === selectedSize)?.price || 0;
-    const addons = selectedAddons.reduce((sum, id) => {
+  const getPriceBreakdown = () => {
+    if (!selectedService || !selectedSize) return { base: 0, sizeAdjustment: 0, addons: [], total: 0 };
+    
+    // Find the variation for the selected size
+    const variation = selectedService.variations.find(v => v.name === selectedSize);
+    const basePrice = variation?.price || 0;
+    
+    const selectedAddonList = selectedAddons.map(id => {
       const addon = availableAddons.find(a => a.id === id);
-      const price = addon?.variations?.[0]?.price || 0;
-      return sum + price;
-    }, 0);
-    return base + addons;
+      return {
+        name: addon?.name || 'Add-on',
+        price: addon?.variations?.[0]?.price || 0
+      };
+    });
+    
+    const addonsTotal = selectedAddonList.reduce((sum, a) => sum + a.price, 0);
+    
+    return {
+      base: basePrice,
+      addons: selectedAddonList,
+      total: basePrice + addonsTotal
+    };
   };
+
+  const priceBreakdown = getPriceBreakdown();
 
   if (loading) {
     return (
@@ -275,27 +304,52 @@ export default function Booking() {
 
   return (
     <div className="min-h-screen bg-zinc-50 pt-24 pb-20">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <Helmet>
+        <title>Book Auto Detailing in Bellevue & Omaha | Fast & Easy Scheduling</title>
+        <meta name="description" content="Book your auto detailing, paint correction, or ceramic coating appointment online. Fast scheduling for Bellevue and Omaha car detailing." />
+      </Helmet>
+      <div className="container mx-auto px-4 max-w-5xl">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold text-zinc-900 mb-2">Book Your Detailing</h1>
-          <p className="text-zinc-600">Professional auto detailing at your convenience.</p>
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl md:text-5xl font-black text-zinc-900 mb-3 tracking-tighter italic">Secure Your Spot</h1>
+          <p className="text-zinc-500 font-medium max-w-xl mx-auto">Select your service, choose a convenient time, and pay a 50% deposit to lock in your appointment.</p>
         </div>
 
         {/* Progress Tracker */}
-        <div className="flex items-center justify-between mb-8 max-w-2xl mx-auto px-4">
-          {['Service', 'Details', 'Payment', 'Success'].map((label, i) => {
-            const steps: Step[] = ['service', 'details', 'payment', 'success'];
-            const isActive = steps.indexOf(step as any) >= i;
-            return (
-              <div key={label} className="flex flex-col items-center gap-2">
-                <div className={`h-2 w-12 rounded-full ${isActive ? 'bg-zinc-900' : 'bg-zinc-200'}`} />
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-zinc-900' : 'text-zinc-400'}`}>
-                  {label}
-                </span>
-              </div>
-            );
-          })}
+        <div className="relative mb-16 max-w-3xl mx-auto px-4">
+          <div className="absolute top-1/2 left-0 w-full h-1 bg-zinc-200 -translate-y-1/2 rounded-full hidden sm:block"></div>
+          <div className="relative flex justify-between">
+            {['Service', 'Details', 'Payment', 'Success'].map((label, i) => {
+              const steps: Step[] = ['service', 'details', 'payment', 'success'];
+              // If current step is 'size', 'addons', or 'datetime', it's technically in between 'service' and 'details'
+              // but we'll consider it part of "Service" phase for the progress bar visual focus, or 
+              // 'details' phase. Let's simplify and make the progress logic robust.
+              let currentIndex = steps.indexOf(step as any);
+              if (step === 'size' || step === 'addons' || step === 'datetime') currentIndex = 0; 
+              if (step === 'details') currentIndex = 1;
+              if (step === 'payment') currentIndex = 2;
+              if (step === 'success') currentIndex = 3;
+
+              const isCompleted = currentIndex > i;
+              const isCurrent = currentIndex === i;
+              const isActive = isCompleted || isCurrent;
+
+              return (
+                <div key={label} className="flex flex-col items-center gap-3 relative z-10 bg-zinc-50 sm:px-4">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                    isCompleted ? 'bg-zinc-900 border-zinc-900 text-white' :
+                    isCurrent ? 'bg-white border-zinc-900 text-zinc-900 shadow-md scale-110' :
+                    'bg-white border-zinc-200 text-zinc-300'
+                  }`}>
+                    {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <span className="text-xs font-black">{i + 1}</span>}
+                  </div>
+                  <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isActive ? 'text-zinc-900' : 'text-zinc-400'}`}>
+                    {label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -308,40 +362,72 @@ export default function Booking() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
+                  className="space-y-6"
                 >
-                  <h2 className="text-xl font-bold text-zinc-900 mb-4">Select a Service</h2>
-                  <div className="grid gap-3">
-                    {mainServices.map(s => (
+                  <div>
+                    <h2 className="text-xl font-bold text-zinc-900 mb-1">Select a Service</h2>
+                    <p className="text-xs text-zinc-500">Pick your baseline service package.</p>
+                  </div>
+
+                  {/* Category Tabs */}
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    {CATEGORIES.filter(c => !['maintenance', 'rv-boat-detailing', 'tractor-detailing'].includes(c.id)).map(cat => (
                       <button
-                        key={s.id}
-                        onClick={() => {
-                          setSelectedService(s);
-                          nextStep();
-                        }}
-                        className={`p-5 rounded-2xl border-2 text-left transition-all ${
-                          selectedService?.id === s.id 
-                            ? 'border-zinc-900 bg-white shadow-md' 
-                            : 'border-white bg-white hover:border-zinc-200'
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+                          selectedCategory === cat.id 
+                            ? 'bg-zinc-900 border-zinc-900 text-white shadow-md' 
+                            : 'bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300'
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-bold text-zinc-900 text-lg">{s.name}</h3>
-                            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-400 mt-1">
-                              <Clock className="h-3 w-3" />
-                              <span>Est. {s.variations?.[0] ? formatDuration(s.variations[0].duration) : 'N/A'}</span>
-                            </div>
-                          </div>
-                          {s.variations?.[0] && (
-                            <span className="text-zinc-900 font-bold bg-zinc-50 px-3 py-1 rounded-full text-sm">
-                              From ${Math.min(...s.variations.map(v => v.price))}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{s.description}</p>
+                        {cat.name}
                       </button>
                     ))}
+                  </div>
+
+                  <div className="grid gap-3">
+                    {mainServices.length > 0 ? (
+                      mainServices.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => {
+                            setSelectedService(s);
+                            nextStep();
+                          }}
+                          className={`p-5 rounded-2xl border-2 text-left transition-all group ${
+                            selectedService?.id === s.id 
+                              ? 'border-zinc-900 bg-white shadow-lg' 
+                              : 'border-transparent bg-white hover:border-zinc-200 shadow-sm'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h3 className="font-bold text-zinc-900 text-lg group-hover:text-zinc-700 transition-colors">{s.name}</h3>
+                              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-400 mt-1">
+                                <Clock className="h-3 w-3" />
+                                <span>Est. {s.variations?.[0] ? formatDuration(s.variations[0].duration) : 'N/A'}</span>
+                              </div>
+                            </div>
+                            {s.variations?.[0] && (
+                              <div className="text-right">
+                                <span className="text-zinc-900 font-bold bg-zinc-50 px-3 py-1 rounded-full text-sm">
+                                  From ${Math.min(...s.variations.map(v => v.price))}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{s.description}</p>
+                          <div className="mt-3 flex items-center text-[10px] font-bold text-zinc-900 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                            Select Package <ChevronRight className="h-3 w-3 ml-1" />
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-12 text-center bg-white rounded-3xl border-2 border-dashed border-zinc-100">
+                        <p className="text-zinc-400 text-sm italic">No services found in this category. Try another tab.</p>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -398,7 +484,7 @@ export default function Booking() {
                   </div>
                   <p className="text-xs text-zinc-500 mb-4 px-1">Enhance your detail with these specialized services.</p>
                   
-                  <div className="grid gap-2">
+                  <div className="grid gap-3">
                     {availableAddons.map(a => {
                       const isSelected = selectedAddons.includes(a.id);
                       const price = a.variations?.[0]?.price || 0;
@@ -414,27 +500,28 @@ export default function Booking() {
                               setSelectedAddons([...selectedAddons, a.id]);
                             }
                           }}
-                          className={`p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                          className={`p-5 rounded-2xl border-2 text-left transition-all flex items-start gap-4 ${
                             isSelected 
-                              ? 'border-zinc-900 bg-white shadow-sm' 
-                              : 'border-white bg-white hover:border-zinc-200'
+                              ? 'border-zinc-900 bg-white shadow-md' 
+                              : 'border-transparent bg-white hover:border-zinc-200'
                           }`}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-5 h-5 rounded border ${isSelected ? 'bg-zinc-900 border-zinc-900' : 'border-zinc-300'} flex items-center justify-center transition-colors`}>
-                              {isSelected && <CheckCircle2 className="h-4 w-4 text-white" />}
-                            </div>
-                            <div>
-                              <h3 className="font-bold text-zinc-900 text-sm tracking-tight">{a.name}</h3>
-                              {duration && (
-                                <div className="flex items-center gap-1 text-[9px] text-zinc-400 font-bold uppercase mt-0.5">
-                                  <Clock className="h-2.5 w-2.5" />
-                                  <span>+{duration}</span>
-                                </div>
-                              )}
-                            </div>
+                          <div className={`mt-1 w-5 h-5 rounded border-2 shrink-0 ${isSelected ? 'bg-zinc-900 border-zinc-900' : 'border-zinc-300'} flex items-center justify-center transition-colors`}>
+                            {isSelected && <CheckCircle2 className="h-4 w-4 text-white" />}
                           </div>
-                          <span className="font-bold text-zinc-900">+${price}</span>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-1">
+                              <h3 className="font-bold text-zinc-900 text-sm tracking-tight">{a.name}</h3>
+                              <span className="font-bold text-zinc-900 text-sm">+${price}</span>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 line-clamp-1 mb-2">{a.description}</p>
+                            {duration && (
+                              <div className="flex items-center gap-1 text-[9px] text-zinc-400 font-bold uppercase">
+                                <Clock className="h-2.5 w-2.5" />
+                                <span>Adds approx. {duration}</span>
+                              </div>
+                            )}
+                          </div>
                         </button>
                       );
                     })}
@@ -714,7 +801,7 @@ export default function Booking() {
 
           {/* Sidebar / Summary */}
           {step !== 'success' && (
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               <div className="bg-white rounded-2xl p-6 border border-zinc-100 shadow-sm sticky top-24">
                 <h3 className="font-bold text-zinc-900 mb-6 flex items-center gap-2 px-1">
                   <Info className="h-4 w-4 text-zinc-400" />
@@ -753,20 +840,43 @@ export default function Booking() {
                     </div>
                   )}
 
-                  <div className="pt-6 border-t border-zinc-100 mt-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-zinc-500">Subtotal</span>
-                        <span className="font-bold text-zinc-900">${totalPrice()}</span>
-                    </div>
+                  <div className="pt-6 border-t border-zinc-100 mt-6 space-y-2">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-zinc-500">Deposit Due Now</span>
-                        <span className="font-bold text-zinc-900">$50.00</span>
+                        <span className="text-xs text-zinc-500">Base Service & Size</span>
+                        <span className="text-xs font-bold text-zinc-900">${priceBreakdown.base}</span>
                     </div>
-                    <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed">
-                        A non-refundable $50 deposit is required to secure your spot. 
-                        Balance will be due upon service completion.
+                    {priceBreakdown.addons.map((a, i) => (
+                      <div key={i} className="flex items-center justify-between animate-in fade-in slide-in-from-right-4">
+                        <span className="text-xs text-zinc-400 italic">+ {a.name}</span>
+                        <span className="text-xs font-bold text-zinc-900">${a.price}</span>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between pt-4 border-t border-zinc-50 mt-2">
+                        <span className="text-sm font-bold text-zinc-900">Estimated Total</span>
+                        <span className="text-lg font-black text-zinc-900">${priceBreakdown.total}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-4">
+                        <span className="text-xs text-zinc-500">Deposit Due Now</span>
+                        <span className="text-xs font-bold text-zinc-900">$50.00</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed bg-zinc-50 p-3 rounded-lg border border-zinc-100">
+                        * Final price may vary based on actual vehicle condition. 
+                        A $50 non-refundable deposit is required to secure your spot.
                     </p>
                   </div>
+                </div>
+              </div>
+
+              <div className="bg-emerald-50 rounded-2xl p-6 border border-emerald-100 hidden lg:block sticky top-[480px]">
+                <div className="flex items-center gap-1 mb-3">
+                  {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 text-emerald-500 fill-emerald-500" />)}
+                </div>
+                <p className="text-sm font-medium text-emerald-900 leading-relaxed italic mb-4">
+                  "Bryan is a wizard. My truck looked like it had been through a mud bog and an inside tornado. It looks better than when I bought it off the lot."
+                </p>
+                <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 bg-emerald-200 rounded-full flex items-center justify-center font-black text-emerald-800 text-xs text-center">M</div>
+                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Mark T. (Bellevue)</p>
                 </div>
               </div>
             </div>

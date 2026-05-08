@@ -27,56 +27,56 @@ export const CATEGORIES = [
     id: 'interior-detailing', 
     slug: 'interior-detailing',
     name: 'Interior Detailing', 
-    description: 'If your interior is starting to look worn, dusty, or stained, this is where I bring it back. My interior detailing focus is on cleaning, restoring, and refreshing every surface.',
+    description: 'Breathe new life into your cabin with our premium interior car detailing in Bellevue and Omaha. We eliminate dust, deep set stains, and odors to deliver a hygienic, factory-fresh driving experience you can instantly feel.',
     image: 'https://images.unsplash.com/photo-1582139329536-e7228392ef23?auto=format&fit=crop&q=80&w=1200'
   },
   { 
     id: 'exterior-detailing', 
     slug: 'exterior-detailing',
     name: 'Exterior Detailing', 
-    description: 'Remove road grime and contamination that dulls your finish. My exterior detailing service restores gloss while adding protection to keep it looking better longer.',
+    description: 'Erase road grime and environmental contamination that dulls your clear coat. Our exterior car detailing service safely restores a brilliant gloss while laying down durable paint protection to defend your vehicle.',
     image: 'https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200'
   },
   { 
     id: 'full-detailing', 
     slug: 'full-detailing',
     name: 'Full Detailing Packages', 
-    description: 'The best place to start. Combined interior and exterior work into one complete service to get your vehicle back to showroom condition.',
+    description: 'The ultimate automotive transformation. We combine our elite interior and exterior auto detailing services into one complete package, engineered to get your car, truck, or SUV back to pristine showroom condition.',
     image: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&q=80&w=1200'
   },
   { 
     id: 'paint-correction', 
     slug: 'paint-correction',
     name: 'Paint Correction', 
-    description: 'Fix swirl marks, scratches, and restore clarity to your clear coat. Precision machine polishing for real improvement, not temporary shine.',
+    description: 'Permanently remove swirl marks, scratches, and oxidation. Our multi-stage machine polishing and paint correction restores true mirror-like clarity and depth to your clear coat—not just a temporary shine.',
     image: 'https://images.unsplash.com/photo-1507136566006-bb91e5088c97?auto=format&fit=crop&q=80&w=1200'
   },
   { 
     id: 'protection', 
     slug: 'ceramic-coating',
     name: 'Ceramic Coating', 
-    description: 'The ultimate protection. Creates a durable layer over your paint that resists dirt, water, and environmental damage while keeping a high-gloss finish.',
+    description: 'Lock in perfection. Our professional-grade ceramic coating creates a resilient, hydrophobic shield over your paint, repelling water, dirt, and UV damage to maintain a high-gloss finish for years.',
     image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=1200'
   },
   { 
     id: 'maintenance', 
     slug: 'maintenance-plans',
     name: 'Maintenance Detailing', 
-    description: 'Stay ahead of the mess. Consistent upkeep detailing designed for vehicles that have already had a full reset.',
+    description: 'Preserve your vehicle\'s value and showroom shine year-round. Our exclusive maintenance auto detailing plans are engineered for Bellevue and Omaha drivers who demand flawless upkeep.',
     image: 'https://images.unsplash.com/photo-1620055375841-7667ff4a193b?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'rv-boat-detailing',
     slug: 'rv-boat-detailing',
     name: 'RV, Boat & Equipment Detailing',
-    description: 'Specialized detailing for larger vehicles. From oxidation removal to full cleanups, we handle the big stuff that needs more than a basic wash.',
+    description: 'Protect your biggest investments from the harsh Midwest elements. From intense oxidation removal to full gel-coat cleanups, our specialized detailing ensures your RV or boat is always adventure-ready.',
     image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'tractor-detailing',
     slug: 'tractor-farm-equipment',
     name: 'Tractor & Farm Equipment',
-    description: 'Professional cleaning and restoration for tractors and farm machinery. We remove heavy building and grease to keep your equipment looking better and lasting longer.',
+    description: 'Maximize the lifespan and performance of your farm machinery. We execute heavy-duty cleaning and degreasing to safeguard your tractors and equipment from destructive buildup.',
     image: 'https://images.unsplash.com/photo-1594913785162-e678ac052429?auto=format&fit=crop&q=80&w=1200'
   }
 ];
@@ -107,36 +107,56 @@ export const SERVICES: Service[] = [
     id: 'interior-detail',
     categoryId: 'interior-detailing',
     name: 'Interior Detail',
-    shortDescription: 'Full interior cleaning for normal use vehicles. Removes buildup, light stains, and restores a clean, fresh feel.',
-    longDescription: 'Restore your interior to a clean, comfortable condition. From light cleanup to full resets, I handle everything from everyday buildup to heavy staining and pet hair.',
+    shortDescription: 'Professional interior cleaning that eliminates buildup and light stains for a fresh, comfortable cabin.',
+    longDescription: 'Reclaim the comfort of your daily commute in Bellevue and Omaha. Our Interior Detail is a professional deep-cleaning service that goes far beyond a quick vacuum. By thoroughly cleaning and sanitizing plastics, extracting light stains, and air-purging tight crevices, we eliminate everyday buildup and restore a crisp, clean, factory-fresh feel to your vehicle’s interior.',
     price: { car: 179, suv: 199, truck: 219, largeSuv: 249 },
     pricingType: 'fixed',
     squareName: 'Interior Detail',
     seo: {
-      title: 'Interior Car Detailing Bellevue NE | Omaha Interior Cleaning',
-      description: 'Professional interior detailing in Bellevue, NE. Deep cleaning and refreshing for your vehicle interior. Serving Omaha, Papillion, and La Vista.'
+      title: 'Interior Car Detailing Bellevue NE | Auto Detailing Omaha',
+      description: 'Experience premium interior car detailing in Bellevue and Omaha. We eliminate dust, grime, and stains to restore a flawless, hygienic driving environment.'
     },
-    features: ['Deep Vacuum & Crevice Clean', 'Steam Sanitization of Hard Surfaces', 'Upholstery Scrub & Light Spot Treat', 'Leather Cleaning & Conditioning', 'Anti-Static Dust Protection'],
-    duration: '3-4 hours',
-    bestFor: 'Daily drivers needing a thorough refresh.',
+    features: [
+      'Full dual-stage vacuum (Interior & Trunk)',
+      'Cracks & crevices air-purged of dust/crumbs',
+      'Plastics & vinyl deep cleaned & sanitized',
+      'Cupholders & cubbies detailed',
+      'Door panels & pockets scrubbed',
+      'Streak-free interior glass clarity',
+      'High-traffic stain spot treatment',
+      'Rubber/Carpet mats deep cleaned',
+      'Premium UV barrier (Prevents cracking)',
+      'Door jambs degreased & shined'
+    ],
+    duration: '2-3.5 hours',
+    bestFor: 'Daily drivers needing a professional reset and long-term surface protection.',
     image: 'https://images.unsplash.com/photo-1582139329536-e7228392ef23?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'interior-reset',
     categoryId: 'interior-detailing',
     name: 'Interior Reset',
-    shortDescription: 'Deep interior restoration for heavy dirt, stains, and pet hair. Designed for neglected or heavily used vehicles.',
-    longDescription: 'When the interior needs more than a standard detail, the Interior Reset is the solution. I focus on heavy stain removal, deep carpet extraction, and intensive cleaning of all surfaces to bring a dirty interior back to life.',
+    shortDescription: 'Intensive deep cleaning & hot water extraction for heavy dirt, severe stains, and stubborn pet hair.',
+    longDescription: 'Turn back the clock on severely neglected interiors. Designed for family haulers and heavily used vehicles in the Omaha metro, the Interior Reset utilizes advanced hot water extraction and therapeutic steam sanitization to pull out deep-seated stains, eliminate ground-in dirt, and completely remove stubborn pet hair. We permanently transform your cabin, recovering its value and pristine condition.',
     price: { car: 249, suv: 279, truck: 309, largeSuv: 349 },
     pricingType: 'fixed',
     squareName: 'Interior Reset',
     seo: {
-      title: 'Deep Interior Car Cleaning Bellevue NE | Heavy Stain & Pet Hair Removal',
-      description: 'Intensive interior restoration in Bellevue. We handle heavy stains, pet hair, and neglected interiors across the Omaha area.'
+      title: 'Deep Interior Car Cleaning Bellevue NE | Stain & Pet Hair Removal',
+      description: 'Total interior auto restoration in Bellevue. We specialize in hot water extraction, heavy stain removal, and pet hair eradication across the Omaha area.'
     },
-    features: ['Hot Water Upholstery Extraction', 'Heavy Stain Removal Treatment', 'Deep Pet Hair Extraction', 'Intensive Steam Cleaning', 'Odor Neutralization'],
-    duration: '5-7 hours',
-    bestFor: 'Neglected vehicles, pets, or high-mileage interiors.',
+    features: [
+      'Everything in Interior Detail',
+      'Hot water extraction (Removes deep stains)',
+      'Therapeutic steam sanitization',
+      'Intensive fabric & upholstery shampoo',
+      'Complete pet hair removal & de-linting',
+      'Seat track & sliding rail deep clean',
+      'Headliner safely spot-cleaned',
+      'Deep odor neutralization treatment'
+    ],
+    duration: '4-6 hours',
+    bestFor: 'Neglected interiors, heavy pet hair, or used-cars needing a "Factory Fresh" feel.',
     badge: 'Deep Restoration'
   },
 
@@ -145,18 +165,27 @@ export const SERVICES: Service[] = [
     id: 'exterior-enhancement',
     categoryId: 'exterior-detailing',
     name: 'Exterior Enhancement',
-    shortDescription: 'Decontaminates paint, restores gloss, and adds protection. Best option beyond a basic wash.',
-    longDescription: 'More than a wash. This removes contamination, restores gloss, and adds protection so your paint looks better and stays cleaner longer.',
-    price: { car: 120, suv: 140, truck: 160, largeSuv: 180 },
+    shortDescription: 'Advanced decontamination wash & premium paint sealant for high-gloss protection.',
+    longDescription: 'Elevate your vehicle\'s curb appeal far beyond a standard car wash. Nebraska roads bombard your clear coat with iron fallout to brake dust. Our Exterior Enhancement uses a technical chemical decontamination and clay bar treatment to pull embedded grit out of your paint, leaving it smooth-as-glass. We lock in the gloss with a hydrophobic silica sealant that protects against harsh weather for up to 6 months.',
+    price: { car: 149, suv: 169, truck: 189, largeSuv: 209 },
     pricingType: 'fixed',
     squareName: 'Exterior Enhancement',
     seo: {
-      title: 'Exterior Detailing Bellevue NE | Gloss Restoration Omaha Area',
-      description: 'Exterior enhancement detail in Bellevue. Remove contaminants, restore gloss, and protect your paint. Serving the greater Omaha area.'
+      title: 'Exterior Auto Detailing Bellevue NE | Paint Decontamination Omaha',
+      description: 'Professional exterior car detailing in Bellevue. We utilize iron decontamination, clay bar treatments, and durable paint sealants for a high-gloss finish.'
     },
-    features: ['Technical pH-neutral Hand Wash', 'Iron Decontamination', 'Clay Bar Treatment', '6-Month Ceramic Sealant', 'Wheel Barrel & Tire Detail'],
+    features: [
+      'Deep foam hand wash (Two-bucket safety)',
+      'Wheels, barrels & wheel arches detailed',
+      'High-gloss tire dressing (No-sling formula)',
+      'Clay bar "Smooth-to-touch" treatment',
+      'Iron & Fallout chemical decontamination',
+      'Hydrophobic gloss sealant (6-month protection)',
+      'Exterior glass hydrophobic treatment',
+      'Trim restoration & UV protection'
+    ],
     duration: '2-3 hours',
-    bestFor: 'Vehicles needing a smooth finish and protection.',
+    bestFor: 'Ending the "rough paint" feel and adding a mirror-like protective shield.',
     badge: 'Best-Seller',
     highlight: true,
     image: 'https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200'
@@ -165,18 +194,25 @@ export const SERVICES: Service[] = [
     id: 'paint-enhancement-polish',
     categoryId: 'exterior-detailing',
     name: 'Paint Enhancement Polish',
-    shortDescription: 'Removes light swirls and improves gloss so your paint looks noticeably better.',
-    longDescription: 'This service includes a machine polish enhancement to remove very light swirl marks and significantly boost the depth and clarity of your paint. It’s the perfect middle ground between a wash and full correction.',
-    price: { car: 249, suv: 289, truck: 329, largeSuv: 369 },
+    shortDescription: 'Machine polishing gloss enhancement that powerfully reduces light swirls and oxidation.',
+    longDescription: 'Instantly upgrade the visual impact of your paint. Using orbital machine polishers and premium finishing compounds, our single-stage Paint Enhancement Polish targets dull, oxidized clear coats. By clearing away micro-marring and a layer of light swirls, we restore 50-70% of the paint\'s original clarity, injecting massive depth and reflective shine into vehicles across Bellevue and Omaha.',
+    price: { car: 299, suv: 349, truck: 399, largeSuv: 449 },
     pricingType: 'fixed',
     squareName: 'Paint Enhancement Polish',
     seo: {
-      title: 'Paint Enhancement Bellevue NE | Machine Polishing Omaha Area',
-      description: 'Machine polish enhancement in Bellevue. Remove light swirls and boost paint gloss for a showroom look across Omaha.'
+      title: 'Machine Paint Polishing Bellevue NE | Car Gloss Enhancement Omaha',
+      description: 'Boost your car\'s shine with machine paint polishing in Bellevue. Our rapid enhancement effectively reduces light swirl marks and dramatically improves clear coat clarity.'
     },
-    features: ['All Exterior Enhancement Features', 'Machine Polish Enhancement', 'Light Swirl Removal', 'Enhanced Gloss & Clarity', 'Sealant Upgrade'],
-    duration: '4-6 hours',
-    bestFor: 'Improving paint appearance without full correction.'
+    features: [
+      'Everything in Exterior Enhancement',
+      'Single-stage machine polish (Rupes system)',
+      'Significant gloss enhancement',
+      'Light swirl & haze reduction',
+      'Paint sealant protection (STS3000)',
+      'Deep visual depth restoration'
+    ],
+    duration: '4-5 hours',
+    bestFor: 'Maximum gloss and light defect removal without full correction.',
   },
 
   // --- PAINT CORRECTION ---
@@ -184,14 +220,14 @@ export const SERVICES: Service[] = [
     id: 'paint-correction-l1',
     categoryId: 'paint-correction',
     name: 'Paint Correction (Level 1)',
-    shortDescription: 'Light improvement. Removes minor haze and light swirl marks.',
-    longDescription: 'Focused on real improvement, this single-stage correction removes light defects and restores clarity to the clear coat. Ideal for newer vehicles or those with minor wear.',
+    shortDescription: 'Dedicated single-stage machine correction to permanently erase minor defects and haze.',
+    longDescription: 'Attain true clarity with professional Paint Correction. This intensive single-stage abrasive polishing process safely levels the top layer of your clear coat, permanently eradicating unsightly car wash scratches, minor swirl marks, and environmental haze. The result is a flawless, mirror-like finish that prepares your paint perfectly for a protective sealant or entry-level ceramic coating.',
     price: { car: 350, suv: 400, truck: 450, largeSuv: 500 },
     pricingType: 'custom',
     squareName: 'Paint Correction (Level 1)',
     seo: {
-      title: 'Single-Stage Paint Correction Bellevue NE | Omaha Paint Polishing',
-      description: 'Professional Level 1 paint correction in Bellevue and Omaha. Restore paint clarity and remove minor imperfections.'
+      title: 'Level 1 Paint Correction Bellevue NE | Swirl Removal Omaha',
+      description: 'Erase swirl marks and scratches with professional Level 1 Paint Correction in Bellevue and Omaha. Achieve a brilliant, clear-coat mirror finish.'
     },
     features: ['Single-Stage Machine Correction', 'Surface Decontamination', 'Gloss Restoration', 'Wipeout Inspection', 'Paint Depth Assessment'],
     duration: '6-8 hours',
@@ -201,14 +237,14 @@ export const SERVICES: Service[] = [
     id: 'paint-correction-l2',
     categoryId: 'paint-correction',
     name: 'Paint Correction (Level 2)',
-    shortDescription: 'Moderate correction. Removes the majority of swirl marks and light scratches.',
-    longDescription: 'A two-stage correction process that first uses a compound to pull out defects, followed by a finishing polish to refine the surface. This addresses moderate swirl marks and deeper imperfections.',
+    shortDescription: 'Advanced two-stage compounding and polishing to remove heavy swirls and scratches.',
+    longDescription: 'The ultimate restoration for heavily swirled or scratched paint. Our Level 2 Paint Correction utilizes a heavy cutting compound to aggressively remove deep defects, followed by an ultra-fine finishing polish to refine the surface and extract maximum gloss. This intensive process rescues older paint systems, making your vehicle look better than the day it rolled off the showroom floor.',
     price: { car: 550, suv: 650, truck: 750, largeSuv: 850 },
     pricingType: 'custom',
     squareName: 'Paint Correction (Level 2)',
     seo: {
-      title: 'Two-Stage Paint Correction Bellevue NE | Swirl Removal Omaha',
-      description: 'Stage 2 paint correction in Bellevue. Removes the majority of swirls and scratches to restore depth.'
+      title: 'Two-Stage Paint Correction Bellevue NE | Deep Scratch Removal Omaha',
+      description: 'Rescue your clear coat with our multi-stage Paint Correction in Bellevue. Eliminate severe swirl marks and scratches for a breathtaking gloss.'
     },
     features: ['Two-Stage Compounding & Polishing', 'Intensive Defect Removal', 'High-Clarity Finishing', 'Prep for Ceramic Coating', 'Detailed Surface Inspection'],
     duration: '1-2 Days',
@@ -221,35 +257,41 @@ export const SERVICES: Service[] = [
     id: 'ceramic-3yr',
     categoryId: 'protection',
     name: '3-Year Ceramic Coating',
-    shortDescription: '3-year protection. Makes maintenance easier and keeps paint glossy.',
-    longDescription: 'I apply professional ceramic coatings in Bellevue for customers across Omaha who want real protection. This 3-year system provides a durable hydrophobic layer that resists environmental damage.',
+    shortDescription: 'Professional 3-year ceramic shield that repels dirt, water, and UV damage.',
+    longDescription: 'Stop waxing your car every season. Our professional-grade 3-Year Ceramic Coating bonds chemically with your clear coat to form an ultra-durable, impenetrable layer of protection. Enjoy self-cleaning hydrophobic properties that sheet water instantly, resist harsh road salts, and make routine maintenance washes 80% easier—all while locking in a permanent, wet-look gloss.',
     price: { car: 700, suv: 800, truck: 900, largeSuv: 1000 },
     pricingType: 'custom',
     squareName: '3-Year Ceramic Coating',
     seo: {
-      title: '3-Year Ceramic Coating Bellevue NE | Omaha Paint Protection',
-      description: 'Durable 3-year ceramic coating in Bellevue, NE. Hydrophobic protection that makes cleaning easier. Serving the Omaha metro.'
+      title: '3-Year Ceramic Coating Bellevue NE | Auto Paint Protection Omaha',
+      description: 'Protect your vehicle with a durable 3-year ceramic coating in Bellevue, NE. Unmatched hydrophobic water beading, UV resistance, and an incredible wet-look shine.'
     },
     features: ['3-Year Professional Grade Coating', 'Deep Hydrophobic Properties', 'UV Protection Barrier', 'Ease of Maintenance', 'Technical Prep Wash Included'],
     duration: '1-2 Days',
     bestFor: 'Long-term shoppers on a budget.'
   },
   {
-    id: 'ceramic-5yr',
+    id: 'protection-package',
     categoryId: 'protection',
     name: 'Protection Package',
-    shortDescription: 'Superior durability and high gloss protection. Keeps paint looking new for years.',
-    longDescription: 'Long-term protection that keeps your vehicle cleaner, shinier, and easier to maintain over time.',
-    price: { car: 1100, suv: 1250, truck: 1400, largeSuv: 1550 },
+    shortDescription: 'The ultimate exterior bundle: Expert paint correction sealed perfectly under a ceramic coating.',
+    longDescription: 'The absolute pinnacle of automotive surface care. We meticulously prepare your vehicle by completely decontaminating the exterior and performing a precision Paint Correction to guarantee the paint is completely flawless. Immediately after, we seal that perfection under a premium Ceramic Coating. This package guarantees years of extreme durability, stunning visual depth, and effortless maintenance.',
+    price: { car: 999, suv: 1199, truck: 1399, largeSuv: 1599 },
     pricingType: 'custom',
     squareName: 'Protection Package',
     seo: {
-      title: '5-Year Ceramic Coating Bellevue NE | Best Car Protection Omaha',
-      description: 'My most popular 5-year ceramic coating in Bellevue. Professional-grade protection and extreme gloss for Omaha vehicles.'
+      title: 'Ceramic Coating & Paint Correction Package Bellevue NE | Omaha',
+      description: 'The ultimate auto detailing package in Bellevue. Combine precision paint correction with a professional ceramic coating to guarantee flawless, long-term protection.'
     },
-    features: ['5-Year Professional Coating', 'Maximum Gloss & Depth', 'Strongest Chemical Resistance', 'Superior Water Beading', 'Lifetime Warranty Eligibility (Optional)'],
+    features: [
+      'Full technical prep wash',
+      'Complete clay & decontamination',
+      'Precision paint correction',
+      'Professional ceramic coating application',
+      'Windshield & wheel face coating included'
+    ],
     duration: '2 Days',
-    bestFor: 'Ultimate long-term protection for any vehicle.',
+    bestFor: 'New vehicles or those wanting the absolute best protection.',
     badge: 'Best Value',
     highlight: true
   },
@@ -259,36 +301,49 @@ export const SERVICES: Service[] = [
     id: 'full-detail-package',
     categoryId: 'full-detailing',
     name: 'Full Detail Package',
-    shortDescription: 'Interior Detail + Exterior Enhancement. Best overall value and most popular choice.',
-    longDescription: 'Complete interior and exterior services bundled together for the best overall results and value.',
-    price: { car: 299, suv: 339, truck: 379, largeSuv: 419 },
+    shortDescription: 'Comprehensive top-to-bottom transformation combining our Elite Interior & Exterior services.',
+    longDescription: 'Why settle for half the job? The Full Detail Package is our signature, comprehensive reset engineered to protect both the inside and outside of your vehicle. By bundling our thorough Interior Detail with the decontamination and gloss enhancement of our Exterior Enhancement, you achieve a totally rejuvenated, show-ready vehicle while securing exceptional package savings.',
+    price: { car: 279, suv: 319, truck: 359, largeSuv: 399 },
     pricingType: 'fixed',
     squareName: 'Full Detail Package',
     seo: {
-      title: 'Full Car Detailing Bellevue NE | Complete Auto Refresh Omaha',
-      description: 'Comprehensive full detailing in Bellevue and Omaha. Interior and exterior restoration in one complete service.'
+      title: 'Full Car Detailing Package Bellevue NE | Complete Auto Refresh Omaha',
+      description: 'Transform your vehicle inside and out with our Full Detail Package in Bellevue. Combining elite interior cleaning with exterior decontamination.'
     },
-    features: ['Standard Interior Detail', 'Exterior Enhancement Detail', 'Engine Bay Clean & Dressing', 'Exhaust Tip Polishing', 'Door Jam Restoration'],
-    duration: '5-7 hours',
-    bestFor: 'Vehicles that haven’t been detailed in 6+ months.',
-    badge: 'Popular Choice'
+    features: [
+      'Professional Interior Detail',
+      'Technical Exterior Enhancement',
+      'Engine Bay Degreasing & Dressing',
+      'Bundle Savings Applied ✅',
+      'Complete 360-Degree Transformation'
+    ],
+    duration: '4-6 hours',
+    bestFor: 'The essential bi-annual refresh for vehicles that deserve to look their best.',
+    badge: 'Best Value'
   },
   {
     id: 'showroom-package',
     categoryId: 'full-detailing',
     name: 'Showroom Package',
-    shortDescription: 'Interior Reset + Paint Enhancement. Big transformation inside and out.',
-    longDescription: 'The Showroom Package is for those who want a noticeable transformation. This includes the Interior Reset for heavy cleaning and a Paint Enhancement Polish to restore visual depth and gloss to the exterior.',
-    price: { car: 449, suv: 499, truck: 549, largeSuv: 599 },
+    shortDescription: 'Our most aggressive restoration package, combining heavy interior extraction and exterior machine polishing.',
+    longDescription: 'Maximize your vehicle’s resale value and drastically wind back the clock. The Showroom Package is a heavy-duty overhaul combining our deep-extraction Interior Reset and our gloss-enhancing Paint Enhancement Polish. We brutally assault interior stains and aggressively buff out clear coat haze, restoring the lost aesthetic glory of neglected daily drivers or pre-sale vehicles.',
+    price: { car: 499, suv: 549, truck: 599, largeSuv: 649 },
     pricingType: 'fixed',
     squareName: 'Showroom Package',
     seo: {
-      title: 'Showroom Detailing Package Bellevue NE | Deep Restoration Omaha',
-      description: 'Ultimate showroom restoration detail in Bellevue. Intensive interior reset and paint enhancement for Omaha drivers.'
+      title: 'Showroom Restoration Auto Detailing Bellevue NE | Resale Detail Omaha',
+      description: 'Boost your car\'s resale value with our Showroom Detailing Package. Deep stain extraction and machine paint polishing to resurrect heavily used vehicles.'
     },
-    features: ['Interior Reset (Heavy Cleaning)', 'Paint Enhancement Machine Polish', 'Engine Bay Detail', 'Fabric/Leather Protection', '1-Year Paint Protection'],
-    duration: '1 Day',
-    bestFor: 'Pre-sale prep or deep restoration.',
+    features: [
+      'Intensive Interior Reset (Shampoo/Steam)',
+      'Machine Paint Enhancement Polish',
+      'Restores 50-70% Paint Clarity',
+      'Full Engine Bay Restoration',
+      'Deep Odor & Fabric Protection',
+      'Maximum Resale Value Prep'
+    ],
+    duration: '6-8 hours',
+    bestFor: 'Pre-sale prep, used car purchases, or restoring the family "adventure" vehicle.',
     highlight: true
   },
 
@@ -297,18 +352,25 @@ export const SERVICES: Service[] = [
     id: 'maintenance-detail',
     categoryId: 'maintenance',
     name: 'Maintenance Plan',
-    shortDescription: 'Light interior and exterior upkeep to keep your vehicle clean between full details.',
-    longDescription: 'Keep your vehicle looking freshly detailed year-round without needing a full reset every time.',
-    price: { car: 99, suv: 119, truck: 139, largeSuv: 159 },
+    shortDescription: 'Exclusive monthly routine upkeep reserved for previously detailed and coated vehicles.',
+    longDescription: 'Protect your detailing investment with our recurring Maintenance Plan. Tailored exclusively for vehicles that have recently received one of our complete detailing or ceramic coating packages, this service utilizes safe wash methods and rapid interior wipe-downs to ensure your vehicle remains in impeccable condition year-round without inducing new paint defects.',
+    price: { car: 119, suv: 139, truck: 159, largeSuv: 179 },
     pricingType: 'fixed',
     squareName: 'Maintenance Plan',
     seo: {
-      title: 'Car Detailing Maintenance Bellevue NE | Routine Upkeep Omaha',
-      description: 'Maintain your vehicle condition with regular detailing in Bellevue. Best for vehicles that have already had a full reset.'
+      title: 'Car Maintenance Detailing Plan Bellevue NE | Auto Cleaning Omaha',
+      description: 'Preserve your ceramic coating or fresh detail. Join our exclusive car maintenance detailing plan in Bellevue for routine, high-quality vehicle upkeep.'
     },
-    features: ['Gentle Interior Refresh & Wipe', 'Safe Hand Wash & Dry', 'Tire & Wheel Face Clean', 'Glass Cleaning & Vacuum', 'Protection Top-Off'],
-    duration: '1.5-2.5 hours',
-    bestFor: 'Keeping a clean vehicle clean.'
+    features: [
+      'Routine maintenance vacuum',
+      'Quick interior wipe down',
+      'Glass cleaned inside & out',
+      'Safe, scratch-free hand wash',
+      'Spray protection sealant refresh',
+      'Tire dressing application'
+    ],
+    duration: '1.5-2 hours',
+    bestFor: 'Existing clients wanting to maintain their investment.',
   },
 
   // --- RV & BOAT ---
@@ -316,54 +378,72 @@ export const SERVICES: Service[] = [
     id: 'rv-boat-wash-wax',
     categoryId: 'rv-boat-detailing',
     name: 'RV / Boat Wash & Wax',
-    shortDescription: 'Thorough cleaning with protection for larger vehicles and boats.',
-    longDescription: 'Thorough exterior cleaning followed by protection to improve shine and help prevent environmental buildup. Pricing: $8–$12 per foot depending on size and condition. Serving Bellevue and the entire Omaha metro area.',
-    price: { rv: 8 }, 
+    shortDescription: 'Meticulous exterior wash and robust UV sealant protection for large recreational vehicles.',
+    longDescription: 'Safeguard your massive mobile investments against harsh aquatic and highway environments. We deliver a meticulously detailed hand wash to strip away aggressive bug splatter and road grime, finishing with an advanced UV-protective wax or sealant to defend the vast surface area of your RV, camper, or boat.',
+    price: { rv: 10 }, 
     pricingType: 'variable',
     squareName: 'RV / Boat Wash & Wax',
     seo: {
-      title: 'RV & Boat Wash & Wax Bellevue NE | Exterior Protection Omaha',
-      description: 'Professional RV and Boat wash and wax in Bellevue, NE. Serving the Omaha area with specialized care for large vehicles.'
+      title: 'RV & Boat Wash & Wax Detailing Bellevue NE | Omaha RV Cleaning',
+      description: 'Protect your camper or boat with our specialized RV and Boat detailing services in Bellevue. Complete wash, bug removal, and long-lasting UV wax protection.'
     },
-    features: ['Technical Exterior Wash', 'Surface Contaminant Removal', 'UV-Resistant Wax Application', 'Roof & Trim Cleaning', 'Wheel & Chrome Polish'],
-    duration: '4-8 hours',
+    features: [
+      'Technical hand wash',
+      'Roof wash (where accessible)',
+      'Wheels & arches cleaned',
+      'Bug & insect removal',
+      'Sealant or wax UV protection'
+    ],
+    duration: '4-6 hours',
     isSpecialty: true
   },
   {
     id: 'rv-boat-oxidation',
     categoryId: 'rv-boat-detailing',
     name: 'Oxidation Removal (RV/Boat)',
-    shortDescription: 'Removes chalky, faded oxidation and restores surface appearance.',
-    longDescription: 'When gel coat or paint becomes chalky and faded, a simple wash isn’t enough. This intensive restoration process removes oxidation to restore original color and gloss. Pricing: $12–$20 per foot depending on severity.',
-    price: { rv: 12 },
+    shortDescription: 'Aggressive machine compounding to restore color and gloss to chalky, oxidized gel-coats.',
+    longDescription: 'When the sun drastically fades your RV or vessel, a simple wash won’t cut it. Our Oxidation Removal tackles severe chalkiness and gel-coat degradation. Using heavy rotary or dual-action machine polishing, we cut through the damaging oxidation, restoring vibrant, mirror-like gloss and sealing it tight to drastically improve the life of the surface.',
+    price: { rv: 20 },
     pricingType: 'variable',
     squareName: 'Oxidation Removal (RV/Boat)',
     seo: {
-      title: 'RV & Boat Oxidation Removal Bellevue NE | Gel Coat Restoration Omaha',
-      description: 'Restore faded gel coat and paint on your RV or boat. Specialized oxidation removal in Bellevue serving the Omaha metro.'
+      title: 'RV & Boat Oxidation Removal Bellevue NE | Gel-Coat Polishing Omaha',
+      description: 'Restore the shine to your faded RV, camper, or boat. We specialize in aggressive machine oxidation removal and gel-coat polishing across the Omaha metro.'
     },
-    features: ['Multi-Stage Oxidation Removal', 'Gel Coat Restoration', 'High-Gloss Finishing Polish', 'Mirror-Shine Sealant', 'Technical Surface Leveling'],
+    features: [
+      'Heavy compound process',
+      'Machine surface restoration',
+      'Gloss recovery polishing',
+      'Mirror-shine sealant application',
+      'Improvement-focused restoration'
+    ],
     duration: '1-2 Days',
     isSpecialty: true,
-    badge: 'Pro Restoration'
+    badge: 'Restoration'
   },
 
   // --- TRACTOR / FARM ---
   {
     id: 'tractor-detailing-service',
     categoryId: 'tractor-detailing',
-    name: 'Tractor / Farm Equipment Detailing',
-    shortDescription: 'Removes heavy dirt and grease to keep equipment looking better and lasting longer.',
-    longDescription: 'Farm equipment and work vehicles take constant abuse from dirt, grease, and weather. Cleaning and restoration services for tractors and machinery in Bellevue. Pricing depends on size and condition. Reach out with photos for a quote.',
-    price: { tractor: 150 }, 
+    name: 'Tractor / Equipment Cleanup',
+    shortDescription: 'Industrial-strength degreasing and cleaning to protect your agricultural investments.',
+    longDescription: 'Nebraska agriculture demands reliable, well-maintained machinery. Our Equipment Cleanup service utilizes industrial-strength degreasing, high-pressure hot water, and meticulous interior cab detailing to blast away corrosive buildup, mud, and grease. Clean machinery operates cooler, lasts longer, and provides a drastically superior operator experience.',
+    price: { tractor: 200 }, 
     pricingType: 'custom',
     squareName: 'Tractor / Farm Equipment Detailing',
     seo: {
-      title: 'Tractor & Farm Equipment Detailing Bellevue NE | Omaha Area',
-      description: 'Professional farm machinery and tractor detailing in Bellevue. We remove heavy grease and dirt to protect your investment.'
+      title: 'Tractor & Farm Equipment Detailing Bellevue NE | Agricultural Cleaning',
+      description: 'Industrial-grade agricultural equipment cleaning in Bellevue. We provide heavy-duty tractor degreasing, pressure washing, and cab detailing.'
     },
-    features: ['Heavy Degreasing & Steam Clean', 'Technical Exterior Wash', 'Component Surface Cleaning', 'Protection Sealant', 'Glass & Cab Restoration'],
-    duration: '4-10 hours',
+    features: [
+      'Heavy-duty degreasing',
+      'Pressure wash of all surfaces',
+      'Cab interior wipe down',
+      'Mud & heavy dirt removal',
+      'Glass clarity restore'
+    ],
+    duration: '3-6 hours',
     isSpecialty: true
   }
 ];

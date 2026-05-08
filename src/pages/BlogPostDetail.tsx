@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Calendar, 
   Clock, 
@@ -97,6 +98,31 @@ export default function BlogPostDetail() {
 
   return (
     <div className="min-h-screen bg-zinc-50 pt-32 pb-24">
+      <Helmet>
+        <title>{post.title} | Bryan's Showroom Quality Detailing</title>
+        <meta name="description" content={post.excerpt} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": post.title,
+            "image": post.featuredImage,
+            "author": {
+              "@type": "Person",
+              "name": post.author
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Bryan's Showroom Quality Detailing",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://bryansdetailing.com/logo.png"
+              }
+            },
+            "datePublished": post.createdAt?.toDate ? post.createdAt.toDate().toISOString() : new Date().toISOString()
+          })}
+        </script>
+      </Helmet>
       {/* Article Header */}
       <div className="container mx-auto px-4 max-w-4xl mb-12">
         <Link 

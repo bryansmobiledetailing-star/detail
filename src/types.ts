@@ -37,6 +37,7 @@ export interface RecommendedService {
     min: number;
     max: number;
   };
+  reasoning?: string;
 }
 
 export interface RecommendationResult {

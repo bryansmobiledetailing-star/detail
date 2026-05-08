@@ -24,11 +24,30 @@ export default function CityDetail() {
     );
   }
 
+  const citySchema = {
+    "@context": "https://schema.org",
+    "@type": "AutoBodyShop",
+    "name": `Bryan's Showroom Quality Detailing - ${city.name}`,
+    "image": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000",
+    "description": city.seo.description,
+    "url": `https://bryansdetailing.com/service-areas/${city.slug}`,
+    "telephone": "123-456-7890", // Replace 
+    "priceRange": "$$",
+    "areaServed": {
+      "@type": "City",
+      "name": city.name,
+      "addressRegion": "NE" // Adjust region if necessary
+    }
+  };
+
   return (
     <div className="bg-white min-h-screen">
       <Helmet>
         <title>{city.seo.title}</title>
         <meta name="description" content={city.seo.description} />
+        <script type="application/ld+json">
+          {JSON.stringify(citySchema)}
+        </script>
       </Helmet>
 
       {/* Hero Section */}

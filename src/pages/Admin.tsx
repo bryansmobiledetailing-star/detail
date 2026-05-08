@@ -33,10 +33,30 @@ export default function Admin() {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [dbServices, setDbServices] = useState<any[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   
   useEffect(() => {
     fetchDbServices();
+    fetchLogs();
   }, []);
+
+  const fetchLogs = async () => {
+    setIsLoadingLogs(true);
+    try {
+      const response = await fetch('/api/admin/logs?limit=10', {
+        headers: getSquareHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch logs:", err);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
 
   const fetchDbServices = async () => {
     setIsLoadingServices(true);
@@ -347,6 +367,72 @@ export default function Admin() {
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* --- NEW: SYSTEM DIAGNOSTIC LOGS --- */}
+                <div className="bg-zinc-900 rounded-[2.5rem] border border-zinc-800 shadow-2xl overflow-hidden mt-8 text-white">
+                  <div className="p-8 border-b border-zinc-800 flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-black italic tracking-tighter">System Diagnostic Logs</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Real-time Square & Engine monitoring</p>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={fetchLogs} className="text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-xl h-8 text-[10px] uppercase font-black tracking-widest">
+                      <RefreshCw className={`h-3 w-3 mr-2 ${isLoadingLogs ? 'animate-spin' : ''}`} />
+                      Refresh Logs
+                    </Button>
+                  </div>
+                  
+                  <div className="p-0">
+                    {logs.length === 0 && !isLoadingLogs ? (
+                      <div className="p-12 text-center">
+                        <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+                          <BarChart3 className="h-8 w-8 text-zinc-700" />
+                        </div>
+                        <p className="text-sm font-black text-zinc-500 italic">No system logs recorded yet.</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-zinc-800">
+                        {logs.map((log) => (
+                          <div key={log.id} className="p-6 hover:bg-white/5 transition-colors group">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-4">
+                                <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
+                                  log.level === 'error' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 
+                                  log.level === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'
+                                }`} />
+                                <div>
+                                  <div className="flex items-center gap-3 mb-1">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{log.source}</span>
+                                    <span className="text-[10px] text-zinc-600">
+                                      {log.timestamp?._seconds 
+                                        ? new Date(log.timestamp._seconds * 1000).toLocaleString() 
+                                        : 'Just now'}
+                                    </span>
+                                  </div>
+                                  <h4 className="text-sm font-bold text-zinc-100">{log.message}</h4>
+                                  {log.details && (
+                                    <div className="mt-3 p-3 bg-zinc-950 rounded-xl border border-zinc-800 hidden group-hover:block animate-in fade-in slide-in-from-top-2">
+                                      <pre className="text-[9px] font-mono text-zinc-400 overflow-x-auto">
+                                        {JSON.stringify(log.details, null, 2)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                  {log.level === 'error' && !log.details && (
+                                    <p className="text-[10px] text-red-400 mt-1 font-medium capitalize">
+                                      {log.level} reported. Hover for technical details.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                              {log.level === 'error' && (
+                                <AlertCircle className="h-4 w-4 text-red-500 opacity-20 group-hover:opacity-100 transition-opacity" />
+                              )}
                             </div>
                           </div>
                         ))}

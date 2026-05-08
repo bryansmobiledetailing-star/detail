@@ -23,22 +23,22 @@ export const CITIES: CityPage[] = [
     name: 'Omaha, NE',
     type: 'primary',
     seo: {
-      title: 'Car Detailing Omaha NE | Interior, Exterior & Ceramic Coating',
-      description: 'Professional car detailing services in Omaha, NE. High-quality interior cleaning, exterior protection, and ceramic coating for Nebraska drivers.'
+      title: 'Auto Detailing Omaha NE | Paint Correction & Ceramic Coating',
+      description: 'Top-rated auto detailing services in Omaha, NE. Specializing in interior detailing, exterior paint correction, and ceramic coating for Nebraska drivers.'
     },
     content: {
-      title: 'Car Detailing in Omaha, NE',
-      intro: 'I provide professional car detailing services for drivers in Omaha and surrounding areas. Every service is designed to restore, protect, and maintain your vehicle at a higher standard than a basic wash.',
-      servicesLabel: 'Services Available in Omaha:',
-      whyLabel: 'Why Omaha drivers choose this service:',
+      title: 'Auto Detailing in Omaha, NE',
+      intro: 'I provide professional auto detailing services for drivers in Omaha and surrounding areas. From deep interior detailing to advanced paint correction and ceramic coating, every service is designed to restore and protect your vehicle perfectly.',
+      servicesLabel: 'Auto Detailing Services Available in Omaha:',
+      whyLabel: 'Why Omaha drivers choose our car detailing:',
       whyPoints: [
-        'Focused on quality results, not volume',
-        'Premium-level detailing process',
+        'Expert paint correction and ceramic coating',
+        'Deep stain extraction interior detailing',
         'Flexible scheduling across Bellevue and Omaha area',
-        'Full restoration options available'
+        'Professional shop and mobile services'
       ],
       serviceAreas: ['Omaha', 'Bellevue', 'Papillion', 'La Vista', 'Council Bluffs'],
-      cta: 'Book your detail today and get a cleaner, better-looking vehicle without the hassle.'
+      cta: 'Book your auto detailing today and get a showroom-ready vehicle without the hassle.'
     }
   },
   {
@@ -46,22 +46,22 @@ export const CITIES: CityPage[] = [
     name: 'Bellevue, NE',
     type: 'primary',
     seo: {
-      title: 'Mobile Car Detailing Bellevue NE | Professional Vehicle Care',
-      description: 'The highest-rated mobile detailing in Bellevue, NE. Based in Bellevue, providing fast availability and premium finishes for all vehicle types.'
+      title: 'Car Detailing Bellevue NE | Auto Detailing & Ceramic Coating',
+      description: 'The premier car detailing in Bellevue, NE. Expert auto detailing, paint correction, interior detailing, and ceramic coating services.'
     },
     content: {
-      title: 'Mobile Car Detailing in Bellevue, NE',
-      intro: 'Based right here in Bellevue, I offer the most convenient and thorough mobile detailing experience in the region. We come to your home or office with everything needed to transform your vehicle.',
-      servicesLabel: 'Services Available in Bellevue:',
-      whyLabel: 'Why Bellevue residents trust us:',
+      title: 'Auto Detailing in Bellevue, NE',
+      intro: 'Based right here in Bellevue, I offer the most thorough and professional auto detailing experience in the region. Whether you need a deep interior detailing reset, advanced paint correction, or long-lasting ceramic coating, we bring your vehicle back to pristine condition.',
+      servicesLabel: 'Auto Detailing Services Available in Bellevue:',
+      whyLabel: 'Why Bellevue residents trust our car detailing:',
       whyPoints: [
-        'Local Bellevue-based operation',
-        'Fast availability for local residents',
+        'Local Bellevue-based auto detailing operation',
+        'Expert ceramic coating & paint correction',
         'Serving Offutt AFB and surrounding communities',
-        'Highest attention to detail'
+        'Highest attention to detail for interior and exterior'
       ],
       serviceAreas: ['Bellevue', 'Offutt AFB', 'Omaha', 'Papillion'],
-      cta: 'Schedule your Bellevue mobile detail now.'
+      cta: 'Schedule your Bellevue auto detailing now.'
     }
   },
   {

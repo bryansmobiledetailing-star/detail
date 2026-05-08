@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import { Droplets, Zap, Shield, ChevronRight, Calendar, AlertCircle, Sparkles, Info, Plus, X, Loader2, CheckCircle2, Send, Camera } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
@@ -247,9 +248,9 @@ export default function Quote() {
                         </ul>
                     </div>
                     <Button asChild className="w-full h-20 text-2xl font-black bg-emerald-500 text-zinc-950 shadow-2xl shadow-emerald-900 animate-pulse">
-                        <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">
+                        <Link to="/book">
                             Secure Consultation Path (${depositAmount})
-                        </a>
+                        </Link>
                     </Button>
                 </div>
             ) : (
@@ -260,9 +261,9 @@ export default function Quote() {
                     </p>
                     <div className="flex flex-col gap-3">
                         <Button asChild className="w-full h-16 text-xl font-bold bg-white text-zinc-950 shadow-xl shadow-zinc-800/40">
-                        <a href={BOOKING_LINK} target="_blank" rel="noopener noreferrer">
+                        <Link to="/book">
                             Reserve for ${depositAmount} Deposit
-                        </a>
+                        </Link>
                         </Button>
                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-2">Applied toward your service total</p>
                     </div>
@@ -280,6 +281,10 @@ export default function Quote() {
 
   return (
     <div className="min-h-screen bg-zinc-50 pt-32 pb-24 font-sans">
+      <Helmet>
+        <title>Get an Auto Detailing Quote | Bellevue & Omaha</title>
+        <meta name="description" content="Request a personalized estimate for professional auto detailing, paint correction, interior detailing, and ceramic coating in Bellevue and Omaha." />
+      </Helmet>
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
@@ -566,28 +571,6 @@ export default function Quote() {
                                             </button>
                                         ))}
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Photo Upload Box Simplified */}
-                            <div className="space-y-4">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 italic">Verify Surface with Photos (Highly Recommended)</label>
-                                <div 
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className={`relative p-6 rounded-2xl border-4 border-dashed transition-all flex items-center justify-center gap-4 cursor-pointer min-h-[120px] ${
-                                        selectedFiles.length > 0 ? 'bg-zinc-900 border-zinc-900' : 'bg-white border-zinc-100 hover:border-zinc-200'
-                                    }`}
-                                >
-                                    <Camera className={`h-8 w-8 ${selectedFiles.length > 0 ? 'text-emerald-500' : 'text-zinc-200'}`} />
-                                    <div className="text-left">
-                                        <p className={`text-md font-black italic ${selectedFiles.length > 0 ? 'text-white' : 'text-zinc-900'}`}>
-                                            {selectedFiles.length > 0 ? `${selectedFiles.length} Photos Attached` : 'Upload Surface Proof'}
-                                        </p>
-                                        <p className={`text-[10px] font-medium ${selectedFiles.length > 0 ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                                            {selectedFiles.length > 0 ? 'Verified Assessment Ready' : 'Tap to select images'}
-                                        </p>
-                                    </div>
-                                    <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
                                 </div>
                             </div>
                         </div>

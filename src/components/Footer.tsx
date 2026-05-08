@@ -38,9 +38,9 @@ export default function Footer() {
     <footer className="bg-zinc-950 text-zinc-400 py-12 border-t border-zinc-800">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-zinc-100">Bryan's Showroom Quality Detailing</h3>
+          <h3 className="text-lg font-semibold text-zinc-100">Bryan's Auto Detailing</h3>
           <p className="text-sm leading-relaxed">
-            Premium auto detailing services based in Bellevue. 10+ years of showroom quality detailing and professional paint correction.
+            Premium auto detailing services based in Bellevue, Nebraska. 10+ years of showroom quality car detailing, interior detailing, and professional paint correction. We bring the ultimate clean to Omaha and Bellevue.
           </p>
           <div className="flex gap-4 pt-2">
             <a href="#" className="hover:text-zinc-100 transition-colors"><Facebook className="h-5 w-5" /></a>

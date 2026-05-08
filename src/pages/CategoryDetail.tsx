@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import { CheckCircle2, ArrowLeft, Calendar, ShieldCheck, Sparkles, Clock, MapPin, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { SERVICES, CATEGORIES } from '../data/services';
@@ -9,12 +10,6 @@ import { BOOKING_LINK } from '../lib/constants';
 export default function CategoryDetail() {
   const { slug } = useParams<{ slug: string }>();
   const category = CATEGORIES.find(c => c.slug === slug);
-
-  React.useEffect(() => {
-    if (category) {
-      document.title = `${category.name} | Showroom Quality Detailing Bellevue`;
-    }
-  }, [category]);
   
   if (!category) {
     return (
@@ -33,6 +28,10 @@ export default function CategoryDetail() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>{category.name} in Bellevue & Omaha | Auto Detailing Services</title>
+        <meta name="description" content={`${category.description} Professional detailing serving Bellevue, Omaha, Papillion, and La Vista.`} />
+      </Helmet>
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">

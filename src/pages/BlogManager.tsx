@@ -17,10 +17,12 @@ import {
   Send,
   FileText
 } from 'lucide-react';
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, Timestamp, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
+import { SEO_BLOG_POSTS } from '../data/seoBlogPosts';
 
 interface BlogPost {
   id: string;
@@ -42,10 +44,39 @@ export default function BlogManager() {
   const [currentPost, setCurrentPost] = useState<Partial<BlogPost> | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+  const [seedLoading, setSeedLoading] = useState(false);
 
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  const handleSeed = async () => {
+    if (!confirm('This will add 3 pre-written, SEO-optimized articles to your blog. Continue?')) return;
+    setSeedLoading(true);
+    try {
+      const blogRef = collection(db, 'blog');
+      for (const post of SEO_BLOG_POSTS) {
+        // Check if slug already exists to prevent duplicates
+        const q = query(blogRef, where('slug', '==', post.slug));
+        const snap = await getDocs(q);
+        if (snap.empty) {
+          await addDoc(blogRef, {
+            ...post,
+            author: 'Bryan', // Force Bryan as author
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now()
+          });
+        }
+      }
+      setStatus({ success: true, message: 'Articles seeded successfully!' });
+      fetchPosts();
+    } catch (err) {
+      console.error(err);
+      setStatus({ success: false, message: 'Failed to seed articles.' });
+    } finally {
+      setSeedLoading(false);
+    }
+  };
 
   async function fetchPosts() {
     try {
@@ -140,12 +171,23 @@ export default function BlogManager() {
               <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Create & refine showroom-quality content</p>
             </div>
           </div>
-          <Button 
-            onClick={handleCreateNew}
-            className="h-14 px-8 rounded-2xl bg-zinc-900 border-0 text-white font-black italic shadow-xl shadow-zinc-200 hover:bg-zinc-800 transition-all flex items-center gap-2"
-          >
-            <Plus className="h-5 w-5" /> New Article
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={handleSeed}
+              disabled={seedLoading}
+              variant="outline"
+              className="h-14 px-8 rounded-2xl border-emerald-100 bg-emerald-50 text-emerald-600 font-black italic hover:bg-emerald-100 transition-all flex items-center gap-2"
+            >
+              <Sparkles className={`h-5 w-5 ${seedLoading ? 'animate-pulse' : ''}`} /> 
+              {seedLoading ? 'Seeding...' : 'Seed SEO Posts'}
+            </Button>
+            <Button 
+              onClick={handleCreateNew}
+              className="h-14 px-8 rounded-2xl bg-zinc-900 border-0 text-white font-black italic shadow-xl shadow-zinc-200 hover:bg-zinc-800 transition-all flex items-center gap-2"
+            >
+              <Plus className="h-5 w-5" /> New Article
+            </Button>
+          </div>
         </div>
 
         {status && (
