@@ -7,7 +7,17 @@ import nodemailer from "nodemailer";
 import { SERVICES, CATEGORIES, VEHICLE_SIZES, SPECIALTY_SIZES, ADD_ONS } from "./src/data/services.ts";
 import { syncServiceToSquare, deleteServiceFromSquare, autoCorrectCatalogDrift, syncAllFirestoreToSquare } from "./src/services/squareSyncEngine.ts";
 import { logToSystem, logSquareError, LogLevel } from "./src/services/errorLogger.ts";
-// Firebase Admin removed as only hosting is used
+import admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import firebaseConfig from './firebase-applet-config.json';
+
+// Initialize Firebase Admin if not already initialized
+if (!admin.apps.length) {
+  admin.initializeApp({
+    projectId: firebaseConfig.projectId,
+  });
+}
+const db = getFirestore(firebaseConfig.firestoreDatabaseId);
 
 // Configure multer for memory storage
 const upload = multer({ 
@@ -566,6 +576,77 @@ async function startServer() {
     } catch (error: any) {
       console.error("Cleanup Error:", error);
       res.status(500).json({ error: error.message || "Cleanup failed" });
+    }
+  });
+
+  // --- NEW MASTER SERVICE CRUD ---
+
+  // List all services from Master DB
+  app.get("/api/admin/services", async (req, res) => {
+    try {
+      const snapshot = await db.collection('services').orderBy('name').get();
+      const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      res.json(services);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Create new service (Master Truth)
+  app.post("/api/admin/services", async (req, res) => {
+    try {
+      const data = req.body;
+      const ref = await db.collection('services').add({
+        ...data,
+        active: true,
+        syncStatus: 'pending',
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      
+      // Auto-sync to Square
+      const syncResult = await syncServiceToSquare(ref.id, req.headers['x-square-access-token'] as string);
+      
+      res.json({ id: ref.id, syncResult });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Update existing service (Master Truth)
+  app.patch("/api/admin/services/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      await db.collection('services').doc(id).update({
+        ...req.body,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Force Push to Square
+      const syncResult = await syncServiceToSquare(id, req.headers['x-square-access-token'] as string);
+      res.json({ success: true, syncResult });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Delete service (Master Truth)
+  app.delete("/api/admin/services/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      const doc = await db.collection('services').doc(id).get();
+      const squareId = doc.data()?.squareId;
+      
+      await db.collection('services').doc(id).delete();
+      
+      // Remove from Square if exists
+      if (squareId) {
+        await deleteServiceFromSquare(squareId, req.headers['x-square-access-token'] as string);
+      }
+      
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
