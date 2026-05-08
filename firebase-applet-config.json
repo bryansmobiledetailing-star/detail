@@ -1,10 +1,10 @@
 {
-  "projectId": "light-trail-428302-a6",
-  "appId": "1:100984255543:web:5e669a710292f3c5be7bb2",
-  "apiKey": "AIzaSyBdKuJrvAoKDS_Q2jJFaVsMZQ0OBsm2o6g",
-  "authDomain": "light-trail-428302-a6.firebaseapp.com",
+  "projectId": "showroom-app-e5ff5",
+  "appId": "1:736909905073:web:871ad59c9a8219e99c6690",
+  "apiKey": "AIzaSyAQUpbHMwumbArx31oWNRQ4Pi3D37c_S1U",
+  "authDomain": "showroom-app-e5ff5.firebaseapp.com",
   "firestoreDatabaseId": "ai-studio-3445121d-3398-495c-9ad4-24e813c2cf17",
-  "storageBucket": "light-trail-428302-a6.firebasestorage.app",
-  "messagingSenderId": "100984255543",
-  "measurementId": "G-6CJ9LPHBZH"
+  "storageBucket": "showroom-app-e5ff5.firebasestorage.app",
+  "messagingSenderId": "736909905073",
+  "measurementId": ""
 }
