@@ -9,10 +9,7 @@
     "rewrites": [
       {
         "source": "**",
-        "run": {
-          "serviceId": "bryans-detailing",
-          "region": "us-west2"
-        }
+        "destination": "/index.html"
       }
     ],
     "headers": [
