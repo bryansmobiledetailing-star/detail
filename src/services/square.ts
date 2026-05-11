@@ -1,4 +1,5 @@
 import { SquareClient, SquareEnvironment } from 'square';
+import { getConfig } from '../lib/config';
 
 export function getSquareClient(tokenOverride?: string): SquareClient {
   const accessToken = tokenOverride || process.env.SQUARE_ACCESS_TOKEN;
@@ -6,9 +7,10 @@ export function getSquareClient(tokenOverride?: string): SquareClient {
     throw new Error('SQUARE_ACCESS_TOKEN environment variable is required. Please add it to the Secrets menu in Settings or the Setup Wizard.');
   }
   
+  const envString = process.env.SQUARE_ENVIRONMENT || getConfig('SQUARE_ENVIRONMENT') || 'sandbox';
   return new SquareClient({
     token: accessToken,
-    environment: (process.env.SQUARE_ENVIRONMENT || 'sandbox') === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
+    environment: envString === 'production' ? SquareEnvironment.Production : SquareEnvironment.Sandbox,
   });
 }
 

@@ -116,6 +116,7 @@ export default function Admin() {
     SQUARE_ACCESS_TOKEN: localStorage.getItem('SESSION_SQUARE_ACCESS_TOKEN') || '',
     VITE_SQUARE_APP_ID: localStorage.getItem('SESSION_VITE_SQUARE_APP_ID') || '',
     VITE_SQUARE_LOCATION_ID: localStorage.getItem('SESSION_VITE_SQUARE_LOCATION_ID') || '',
+    SQUARE_ENVIRONMENT: localStorage.getItem('SESSION_SQUARE_ENVIRONMENT') || '',
     GOOGLE_MAPS_API_KEY: localStorage.getItem('SESSION_GOOGLE_MAPS_API_KEY') || '',
     GOOGLE_PLACE_ID: localStorage.getItem('SESSION_GOOGLE_PLACE_ID') || ''
   });
@@ -811,6 +812,17 @@ export default function Admin() {
                             placeholder="L..."
                             className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                           />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400 block mb-1">Environment (sandbox / production)</label>
+                          <select 
+                            value={sessionKeys.SQUARE_ENVIRONMENT || 'sandbox'}
+                            onChange={(e) => setSessionKeys(prev => ({ ...prev, SQUARE_ENVIRONMENT: e.target.value }))}
+                            className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-[10px] font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                          >
+                            <option value="sandbox">Sandbox</option>
+                            <option value="production">Production</option>
+                          </select>
                         </div>
                         <div className="pt-2">
                           <p className="text-[10px] text-zinc-400 italic leading-tight">

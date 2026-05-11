@@ -6,7 +6,7 @@
   "main": "server.ts",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
+    "build": "vite build && npx esbuild server.ts --platform=node --target=node22 --format=esm --bundle --packages=external --outfile=dist/server.js",
     "preview": "vite preview",
     "deploy:hosting": "npm run build && npx firebase deploy --only hosting",
     "deploy:firestore": "npx firebase deploy --only firestore",
@@ -15,7 +15,7 @@
     "sync-square": "tsx scripts/sync-to-square.ts",
     "migrate-to-master": "tsx scripts/migrate-to-master.ts",
     "lint": "eslint . && tsc --noEmit",
-    "start": "node server.ts"
+    "start": "NODE_ENV=production node dist/server.js"
   },
   "engines": {
     "node": ">=22"
