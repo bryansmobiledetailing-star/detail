@@ -709,10 +709,17 @@ async function startServer() {
   // Google Places Reviews Endpoint
   app.get("/api/reviews", async (req, res) => {
     try {
-      const apiKey = (req.headers['x-google-maps-api-key'] as string) || process.env.GOOGLE_MAPS_API_KEY;
-      const placeId = (req.headers['x-google-place-id'] as string) || process.env.GOOGLE_PLACE_ID;
+      let apiKey = req.headers['x-google-maps-api-key'] as string;
+      if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey === '') {
+        apiKey = process.env.GOOGLE_MAPS_API_KEY as string;
+      }
 
-      if (!apiKey || !placeId) {
+      let placeId = req.headers['x-google-place-id'] as string;
+      if (!placeId || placeId === 'undefined' || placeId === 'null' || placeId === '') {
+        placeId = process.env.GOOGLE_PLACE_ID as string;
+      }
+
+      if (!apiKey || !placeId || placeId === 'undefined' || apiKey === 'undefined' || placeId === 'null' || apiKey === 'null') {
         return res.json({ 
           success: false, 
           message: "Google Maps API Key and Place ID must be configured in Admin Setup Wizard",
@@ -720,38 +727,38 @@ async function startServer() {
         });
       }
 
-      const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews&key=${apiKey}`);
-
-      if (!response.ok) {
-        throw new Error(`Google Places API error: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      // Use Places API (New) which supports API keys with HTTP Referrer restrictions
+      // We pass the origin/referer from the client to the Google API
+      const referer = req.get('origin') || req.get('referer') || 'https://bryansdetailingomaha.com';
       
-      if (data.status !== 'OK') {
-        let message = `Google Places API error: ${data.status}`;
-        if (data.status === 'REQUEST_DENIED') {
-          message = "Google Places API request denied. Please ensure: 1. Your API Key is valid. 2. The 'Places API' (Legacy) is enabled in Google Cloud Console. 3. Billing is enabled on your Google Cloud project.";
-        } else if (data.status === 'INVALID_REQUEST') {
-          message = "Invalid Google Place ID. Please check the Place ID in your settings.";
+      const response = await fetch(`https://places.googleapis.com/v1/places/${placeId}?fields=reviews`, {
+        headers: {
+          'X-Goog-Api-Key': apiKey,
+          'Referer': referer
         }
-        
-        console.warn(message);
+      });
+
+      const data = await response.json().catch(() => ({}));
+      
+      if (!response.ok || data.error) {
+        const errorData = data.error || {};
+        let message = `Google Places API error: ${errorData.status || errorData.code || response.statusText}`;
+        console.warn(message, errorData.message || response.status);
         return res.json({ 
           success: false, 
-          message,
+          message: errorData.message || message,
           reviews: [] // Frontend will fall back
         });
       }
 
       // Map Google reviews to our format
-      const reviews = (data.result?.reviews || []).map((review: any, index: number) => ({
+      const reviews = (data.reviews || []).map((review: any, index: number) => ({
         id: index + 1,
-        name: review.author_name || "Customer",
+        name: review.authorAttribution?.displayName || "Customer",
         role: "Google Review",
-        content: review.text || "",
+        content: review.text?.text || review.originalText?.text || "",
         rating: review.rating || 5,
-        image: review.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.author_name || 'Customer')}&background=random`
+        image: review.authorAttribution?.photoUri || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.authorAttribution?.displayName || 'Customer')}&background=random`
       }));
 
       res.json({ success: true, reviews });

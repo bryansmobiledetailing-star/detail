@@ -313,14 +313,14 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
              <BeforeAfterSlider 
-               beforeImage="/20191020_062857.jpg" 
-               afterImage="/20191020_165304.jpg" 
+               beforeImage="/20191020_062847.jpg" 
+               afterImage="/20191020_062924.jpg" 
                beforeLabel="Before Polish" 
                afterLabel="After Paint Correction" 
              />
              <BeforeAfterSlider 
-               beforeImage="/20191020_110339.jpg" 
-               afterImage="/20191020_165146.jpg" 
+               beforeImage="/20191020_110329.jpg" 
+               afterImage="/20191020_110339.jpg" 
                beforeLabel="Interior Before" 
                afterLabel="Showroom Detail" 
              />

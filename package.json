@@ -6,7 +6,7 @@
   "main": "server.ts",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && npx esbuild server.ts --platform=node --target=node22 --format=esm --bundle --packages=external --outfile=dist/server.js",
+    "build": "vite build && esbuild server.ts --platform=node --target=node22 --format=esm --bundle --packages=external --outfile=dist/server.js",
     "preview": "vite preview",
     "deploy:hosting": "npm run build && npx firebase deploy --only hosting",
     "deploy:firestore": "npx firebase deploy --only firestore",
@@ -54,6 +54,7 @@
     "@types/node": "^22.14.0",
     "@types/nodemailer": "^8.0.0",
     "autoprefixer": "^10.4.21",
+    "esbuild": "^0.28.0",
     "eslint": "^10.2.1",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",

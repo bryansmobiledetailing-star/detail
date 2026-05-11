@@ -250,8 +250,8 @@ export default function ServiceDetail() {
               </div>
               <div className="relative">
                  <BeforeAfterSlider 
-                    beforeImage="https://images.unsplash.com/photo-1507136566006-bb91e5088c97?auto=format&fit=crop&q=80&w=1200" 
-                    afterImage="https://images.unsplash.com/photo-1599256621730-535171e28e50?auto=format&fit=crop&q=80&w=1200" 
+                    beforeImage="/20191020_062847.jpg" 
+                    afterImage="/20191020_062924.jpg" 
                  />
                  <div className="absolute -bottom-6 -right-6 bg-emerald-500 text-white p-6 rounded-3xl shadow-xl shadow-emerald-500/20 z-20">
                     <Sparkles className="h-6 w-6" />
