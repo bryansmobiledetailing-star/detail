@@ -87,7 +87,7 @@ export default function ServiceDetail() {
               "name": "Bryan's Showroom Quality Detailing",
               "image": "https://images.unsplash.com/photo-1552930294-6b595f4c2974?auto=format&fit=crop&q=80&w=1200"
             },
-            "url": `https://bryansdetailing.com/services/detail/${service.id}`
+            "url": `https://bryansdetailing.com/services/${service.id}`
           })}
         </script>
       </Helmet>
@@ -104,7 +104,7 @@ export default function ServiceDetail() {
             </Link>
             <ChevronRight className="h-3 w-3" />
             <Link
-              to={`/services/${category.slug}`}
+              to={`/services/category/${category.slug}`}
               className="hover:text-zinc-900 transition-colors"
             >
               {category.name}
@@ -469,7 +469,7 @@ export default function ServiceDetail() {
               .map((relService) => (
                 <Link
                   key={relService.id}
-                  to={`/services/detail/${relService.id}`}
+                  to={`/services/${relService.id}`}
                   className="group bg-white p-10 rounded-[2.5rem] border border-zinc-100 shadow-xl shadow-zinc-200/20 hover:shadow-2xl hover:translate-y-[-8px] transition-all duration-500 flex flex-col"
                 >
                   <div className="flex justify-between items-start mb-6">

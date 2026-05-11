@@ -7,6 +7,7 @@ import { BOOKING_LINK } from '../lib/constants';
 import DetailingQuiz from '../components/DetailingQuiz';
 import ServiceMap from '../components/ServiceMap';
 import Testimonials from '../components/Testimonials';
+import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import { SERVICES } from '../data/services';
 import { CITIES } from '../data/cities';
 
@@ -216,7 +217,7 @@ export default function Home() {
                       <Link to="/book" className="flex items-center gap-2">Book Now <ArrowUpRight className="h-4 w-4" /></Link>
                     </Button>
                     <Button variant="ghost" className={`h-12 text-[10px] font-black uppercase tracking-widest transition-colors ${idx === 1 ? 'text-zinc-400 hover:text-white hover:bg-zinc-800' : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'}`} asChild>
-                      <Link to={`/services/detail/${service.id}`}>Detailed Scope</Link>
+                      <Link to={`/services/${service.id}`}>Detailed Scope</Link>
                     </Button>
                   </div>
                 </div>
@@ -299,6 +300,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Transformations Section */}
+      <section className="py-32 bg-zinc-50 border-t border-zinc-200">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto space-y-6 mb-16">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 italic">Visual Evidence</span>
+            <h2 className="text-5xl md:text-6xl font-black text-zinc-900 tracking-tight leading-none uppercase">
+               Night & <span className="text-emerald-500 italic font-medium tracking-tight normal-case">Day.</span>
+            </h2>
+            <p className="text-lg text-zinc-600 max-w-2xl mx-auto font-medium">Slide to see the difference a professional multi-stage paint correction and interior detail makes.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+             <BeforeAfterSlider 
+               beforeImage="/20191020_062857.jpg" 
+               afterImage="/20191020_165304.jpg" 
+               beforeLabel="Before Polish" 
+               afterLabel="After Paint Correction" 
+             />
+             <BeforeAfterSlider 
+               beforeImage="/20191020_110339.jpg" 
+               afterImage="/20191020_165146.jpg" 
+               beforeLabel="Interior Before" 
+               afterLabel="Showroom Detail" 
+             />
+          </div>
+          <div className="mt-12 text-center">
+             <Button variant="outline" className="rounded-xl font-black uppercase tracking-widest text-xs border-zinc-200" asChild>
+                <Link to="/gallery">View Full Gallery</Link>
+             </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="py-32 bg-white overflow-hidden">
         <div className="container mx-auto px-4 text-center">
@@ -310,6 +344,20 @@ export default function Home() {
           </div>
           <Testimonials />
         </div>
+      </section>
+
+      {/* Service Area Grid */}
+      <section className="py-32 bg-zinc-50 border-t border-zinc-200">
+         <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto space-y-6 mb-16 text-center">
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 italic">Local Operations</span>
+               <h2 className="text-5xl md:text-6xl font-black text-zinc-900 tracking-tight leading-none uppercase">
+                  Service <span className="text-emerald-500 italic font-medium tracking-tight normal-case">Radius.</span>
+               </h2>
+               <p className="text-lg text-zinc-600 max-w-2xl mx-auto font-medium">Located in Bellevue, serving the entire Omaha metro with mobile and shop-based options.</p>
+            </div>
+            <ServiceMap />
+         </div>
       </section>
 
       {/* FAQ Section */}

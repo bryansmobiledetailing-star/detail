@@ -68,7 +68,7 @@ export default function Services() {
         "@type": "Service",
         "name": service.name,
         "description": service.shortDescription,
-        "url": `https://bryansdetailing.com/services/detail/${service.id}`
+        "url": `https://bryansdetailing.com/services/${service.id}`
       }
     }))
   };
@@ -437,7 +437,7 @@ function ServiceCard({ service, squareServices }: { service: Service; squareServ
           </Button>
           
           <Link 
-            to={`/services/detail/${service.id}`}
+            to={`/services/${service.id}`}
             className="group/more block"
           >
             <div className={`w-full h-12 rounded-2xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-[0.2em] transition-all duration-300 ${

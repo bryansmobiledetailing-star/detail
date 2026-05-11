@@ -13,6 +13,7 @@ import FAQ from './pages/FAQ';
 import FAQManager from './pages/FAQManager';
 import Booking from './pages/Booking';
 import Admin from './pages/Admin';
+import AdminServiceManager from './pages/AdminServiceManager';
 import Blog from './pages/Blog';
 import BlogPostDetail from './pages/BlogPostDetail';
 import BlogManager from './pages/BlogManager';
@@ -37,8 +38,8 @@ function SEO() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  const categoryMatch = pathname.match(/^\/services\/([a-z-]+)$/);
-  const serviceMatch = pathname.match(/^\/services\/detail\/([a-z0-9-]+)$/);
+  const serviceMatch = pathname.match(/^\/services\/([a-z0-9-]+)$/);
+  const categoryMatch = pathname.match(/^\/services\/category\/([a-z-]+)$/);
   const cityMatch = pathname.match(/^\/areas\/([a-z-]+)$/);
   let pageSeo = null;
   
@@ -47,8 +48,8 @@ function SEO() {
     const category = CATEGORIES.find(c => c.slug === slug);
     if (category) {
       pageSeo = {
-        title: `${category.name} | Bryan's Showroom Quality Detailing`,
-        description: category.description
+        title: category.seo?.title || `${category.name} | Bryan's Showroom Quality Detailing`,
+        description: category.seo?.description || category.description
       };
     }
   }
@@ -82,7 +83,7 @@ function SEO() {
     },
     '/services': {
       title: "Detailing Services | Paint Correction & Ceramic Coating Omaha",
-      description: "Explore our premium detailing packages. From signature interior resets to multi-stage paint correction and ceramic protection in Bellevue."
+      description: "Premium car detailing in Bellevue and Omaha. We offer comprehensive auto detailing services including interior detailing, exterior washes, multi-stage paint correction, and long-lasting ceramic coating."
     },
     '/book': {
       title: "Book Your Detail | Professional Auto Detailing Bellevue",
@@ -228,8 +229,8 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/services" element={<Services />} />
-                <Route path="/services/:slug" element={<CategoryDetail />} />
-                <Route path="/services/detail/:serviceId" element={<ServiceDetail />} />
+                <Route path="/services/:serviceId" element={<ServiceDetail />} />
+                <Route path="/services/category/:slug" element={<CategoryDetail />} />
                 <Route path="/areas/:slug" element={<CityDetail />} />
                 <Route path="/membership" element={<Membership />} />
                 <Route path="/gift-cards" element={<GiftCards />} />
@@ -245,6 +246,14 @@ export default function App() {
                   element={
                     <AdminGuard>
                       <Admin />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/services" 
+                  element={
+                    <AdminGuard>
+                      <AdminServiceManager />
                     </AdminGuard>
                   } 
                 />

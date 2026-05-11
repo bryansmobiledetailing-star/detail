@@ -58,7 +58,7 @@ export default function Booking() {
   const [error, setError] = useState<string | null>(null);
 
   // Selection states
-  const [selectedService, setSelectedService] = useState<SquareService | null>(null);
+  const [selectedServices, setSelectedServices] = useState<SquareService[]>([]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -86,19 +86,19 @@ export default function Booking() {
   }, []);
 
   useEffect(() => {
-    if (services.length > 0 && preSelectedServiceId && !selectedService) {
+    if (services.length > 0 && preSelectedServiceId && selectedServices.length === 0) {
       const localService = SERVICES.find(s => s.id === preSelectedServiceId);
       if (localService) {
         const targetName = (localService.squareName || localService.name.split(' (')[0]).toLowerCase();
         const matched = services.find(s => s.name.toLowerCase().includes(targetName));
         if (matched) {
-          setSelectedService(matched);
+          setSelectedServices([matched]);
           setSelectedCategory(localService.categoryId);
           setStep('size');
         }
       }
     }
-  }, [services, preSelectedServiceId, selectedService]);
+  }, [services, preSelectedServiceId, selectedServices]);
 
   const fetchServices = async () => {
     try {
@@ -143,19 +143,27 @@ export default function Booking() {
   });
 
   const fetchAvailability = async (date: Date) => {
-    if (!selectedService || !selectedSize) return;
+    if (selectedServices.length === 0 || !selectedSize) return;
     
     setSlotsLoading(true);
     setError(null);
     try {
-      // Find variation that matches the selected size exactly
-      const variation = selectedService.variations.find(v => v.name === selectedSize);
-      const vId = variation?.id || selectedService.variations[0].id;
+      const serviceVariationIds: string[] = [];
+      selectedServices.forEach(srv => {
+        const variation = srv.variations.find(v => v.name === selectedSize);
+        serviceVariationIds.push(variation?.id || srv.variations[0].id);
+      });
+      selectedAddons.forEach(id => {
+        const addon = availableAddons.find(a => a.id === id);
+        if (addon && addon.variations.length > 0) {
+          serviceVariationIds.push(addon.variations[0].id);
+        }
+      });
       
       const start = format(date, "yyyy-MM-dd'T'00:00:00'Z'");
       const end = format(date, "yyyy-MM-dd'T'23:59:59'Z'");
       
-      const res = await fetch(`/api/availability?start=${start}&end=${end}&serviceVariationId=${vId}`, {
+      const res = await fetch(`/api/availability?start=${start}&end=${end}&serviceVariationIds=${serviceVariationIds.join(',')}`, {
         headers: getSquareHeaders()
       });
       if (!res.ok) {
@@ -176,7 +184,7 @@ export default function Booking() {
     if (selectedDate && step === 'datetime') {
       fetchAvailability(selectedDate);
     }
-  }, [selectedDate, step]);
+  }, [selectedDate, step, selectedServices, selectedAddons, selectedSize]);
 
   const handleBooking = async () => {
     if (!selectedDate || !selectedSlot) return;
@@ -184,8 +192,17 @@ export default function Booking() {
     setBookingLoading(true);
     setError(null);
     try {
-      const variation = selectedService?.variations.find(v => v.name === selectedSize);
-      const vId = variation?.id || selectedService?.variations[0].id;
+      const serviceVariationIds: string[] = [];
+      selectedServices.forEach(srv => {
+        const variation = srv.variations.find(v => v.name === selectedSize);
+        serviceVariationIds.push(variation?.id || srv.variations[0].id);
+      });
+      selectedAddons.forEach(id => {
+        const addon = availableAddons.find(a => a.id === id);
+        if (addon && addon.variations.length > 0) {
+          serviceVariationIds.push(addon.variations[0].id);
+        }
+      });
 
       const res = await fetch('/api/bookings', {
         method: 'POST',
@@ -195,7 +212,7 @@ export default function Booking() {
         },
         body: JSON.stringify({
           startAt: selectedSlot.startAt,
-          serviceVariationIds: [vId],
+          serviceVariationIds,
           customer: customerInfo
         })
       });
@@ -266,11 +283,13 @@ export default function Booking() {
   };
 
   const getPriceBreakdown = () => {
-    if (!selectedService || !selectedSize) return { base: 0, sizeAdjustment: 0, addons: [], total: 0 };
+    if (selectedServices.length === 0 || !selectedSize) return { base: 0, sizeAdjustment: 0, addons: [], total: 0 };
     
-    // Find the variation for the selected size
-    const variation = selectedService.variations.find(v => v.name === selectedSize);
-    const basePrice = variation?.price || 0;
+    let basePrice = 0;
+    selectedServices.forEach(srv => {
+      const variation = srv.variations.find(v => v.name === selectedSize);
+      basePrice += (variation?.price || srv.variations[0].price || 0);
+    });
     
     const selectedAddonList = selectedAddons.map(id => {
       const addon = availableAddons.find(a => a.id === id);
@@ -388,47 +407,60 @@ export default function Booking() {
 
                   <div className="grid gap-3">
                     {mainServices.length > 0 ? (
-                      mainServices.map(s => (
-                        <button
-                          key={s.id}
-                          onClick={() => {
-                            setSelectedService(s);
-                            nextStep();
-                          }}
-                          className={`p-5 rounded-2xl border-2 text-left transition-all group ${
-                            selectedService?.id === s.id 
-                              ? 'border-zinc-900 bg-white shadow-lg' 
-                              : 'border-transparent bg-white hover:border-zinc-200 shadow-sm'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-bold text-zinc-900 text-lg group-hover:text-zinc-700 transition-colors">{s.name}</h3>
-                              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-400 mt-1">
-                                <Clock className="h-3 w-3" />
-                                <span>Est. {s.variations?.[0] ? formatDuration(s.variations[0].duration) : 'N/A'}</span>
-                              </div>
+                      mainServices.map(s => {
+                        const isSelected = !!selectedServices.find(ss => ss.id === s.id);
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedServices(selectedServices.filter(ss => ss.id !== s.id));
+                              } else {
+                                setSelectedServices([...selectedServices, s]);
+                              }
+                            }}
+                            className={`p-5 rounded-2xl border-2 text-left transition-all flex items-start gap-4 group ${
+                              isSelected 
+                                ? 'border-zinc-900 bg-white shadow-lg' 
+                                : 'border-transparent bg-white hover:border-zinc-200 shadow-sm'
+                            }`}
+                          >
+                            <div className={`mt-0.5 w-5 h-5 rounded border-2 shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'bg-zinc-900 border-zinc-900' : 'border-zinc-300'}`}>
+                              {isSelected && <CheckCircle2 className="h-4 w-4 text-white" />}
                             </div>
-                            {s.variations?.[0] && (
-                              <div className="text-right">
-                                <span className="text-zinc-900 font-bold bg-zinc-50 px-3 py-1 rounded-full text-sm">
-                                  From ${Math.min(...s.variations.map(v => v.price))}
-                                </span>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <h3 className="font-bold text-zinc-900 text-lg group-hover:text-zinc-700 transition-colors">{s.name}</h3>
+                                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-zinc-400 mt-1">
+                                    <Clock className="h-3 w-3" />
+                                    <span>Est. {s.variations?.[0] ? formatDuration(s.variations[0].duration) : 'N/A'}</span>
+                                  </div>
+                                </div>
+                                {s.variations?.[0] && (
+                                  <div className="text-right">
+                                    <span className="text-zinc-900 font-bold bg-zinc-50 px-3 py-1 rounded-full text-sm">
+                                      From ${Math.min(...s.variations.map(v => v.price))}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                          <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{s.description}</p>
-                          <div className="mt-3 flex items-center text-[10px] font-bold text-zinc-900 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
-                            Select Package <ChevronRight className="h-3 w-3 ml-1" />
-                          </div>
-                        </button>
-                      ))
+                              <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{s.description}</p>
+                            </div>
+                          </button>
+                        );
+                      })
                     ) : (
                       <div className="p-12 text-center bg-white rounded-3xl border-2 border-dashed border-zinc-100">
                         <p className="text-zinc-400 text-sm italic">No services found in this category. Try another tab.</p>
                       </div>
                     )}
                   </div>
+                  {selectedServices.length > 0 && (
+                    <Button className="w-full h-14 mt-6 text-base font-bold shadow-lg" onClick={nextStep}>
+                      Continue to Vehicle Size
+                    </Button>
+                  )}
                 </motion.div>
               )}
 
@@ -447,7 +479,7 @@ export default function Booking() {
                     <h2 className="text-xl font-bold text-zinc-900">Vehicle Size</h2>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    {(selectedService?.variations?.some(v => v.name.includes('RV')) ? SPECIALTY_SIZES : VEHICLE_SIZES).map(v => (
+                    {(selectedServices.some(s => s.variations?.some(v => v.name.includes('RV'))) ? SPECIALTY_SIZES : VEHICLE_SIZES).map(v => (
                       <button
                         key={v.id}
                         onClick={() => {
@@ -809,10 +841,12 @@ export default function Booking() {
                 </h3>
                 
                 <div className="space-y-4">
-                  {selectedService && (
+                  {selectedServices.length > 0 && (
                     <div className="animate-in fade-in slide-in-from-right-4">
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase mb-1">Service</p>
-                      <p className="text-sm font-bold text-zinc-900">{selectedService.name}</p>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase mb-1">Services</p>
+                      {selectedServices.map(srv => (
+                        <p key={srv.id} className="text-sm font-bold text-zinc-900">{srv.name}</p>
+                      ))}
                     </div>
                   )}
                   {selectedSize && (

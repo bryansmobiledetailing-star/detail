@@ -29,8 +29,8 @@ export default function CategoryDetail() {
   return (
     <div className="min-h-screen bg-white">
       <Helmet>
-        <title>{category.name} in Bellevue & Omaha | Auto Detailing Services</title>
-        <meta name="description" content={`${category.description} Professional detailing serving Bellevue, Omaha, Papillion, and La Vista.`} />
+        <title>{category.seo?.title || `${category.name} in Bellevue & Omaha | Auto Detailing Services`}</title>
+        <meta name="description" content={category.seo?.description || `${category.description} Professional detailing serving Bellevue, Omaha, Papillion, and La Vista.`} />
       </Helmet>
       {/* Hero Section */}
       <section className="relative h-[60vh] flex items-center overflow-hidden">
@@ -139,7 +139,7 @@ export default function CategoryDetail() {
                         </Link>
                       </Button>
                       <Button size="lg" variant="outline" className="h-14 px-10 text-lg" asChild>
-                        <Link to={`/services/detail/${service.id}`}>Learn More</Link>
+                        <Link to={`/services/${service.id}`}>Learn More</Link>
                       </Button>
                       <Button variant="ghost" className="h-14 px-6 text-zinc-500" asChild>
                         <Link to="/quote">Custom Quote</Link>

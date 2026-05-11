@@ -5,19 +5,7 @@ import path from "path";
 import multer from "multer";
 import nodemailer from "nodemailer";
 import { SERVICES, CATEGORIES, VEHICLE_SIZES, SPECIALTY_SIZES, ADD_ONS } from "./src/data/services.ts";
-import { syncServiceToSquare, deleteServiceFromSquare, autoCorrectCatalogDrift, syncAllFirestoreToSquare } from "./src/services/squareSyncEngine.ts";
 import { logToSystem, logSquareError, LogLevel } from "./src/services/errorLogger.ts";
-import admin from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
-import firebaseConfig from './firebase-applet-config.json';
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    projectId: firebaseConfig.projectId,
-  });
-}
-const db = getFirestore(firebaseConfig.firestoreDatabaseId);
 
 // Configure multer for memory storage
 const upload = multer({ 
@@ -27,7 +15,7 @@ const upload = multer({
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
 
@@ -48,6 +36,14 @@ async function startServer() {
   };
 
   // API Routes
+  app.get("/api/admin/force-migrate", async (req, res) => {
+    try {
+      res.json({ status: "ok", count: 0, message: "Disabled as Firestore is no longer used for backend service syncing." });
+    } catch (e: any) {
+      res.status(500).json({ status: "error", error: e.message });
+    }
+  });
+
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
   });
@@ -192,13 +188,15 @@ async function startServer() {
   // Square Availability API
   app.get("/api/availability", async (req, res) => {
     try {
-      const { start, end, serviceVariationId } = req.query;
+      const { start, end, serviceVariationId, serviceVariationIds } = req.query;
       
       if (!start || !end) {
         return res.status(400).json({ error: "Start and end dates are required" });
       }
 
       const client = getClientFromReq(req) as any;
+      const ids = serviceVariationIds ? (serviceVariationIds as string).split(',') : [(serviceVariationId as string) || "ANY_SERVICE_VARIATION_ID"];
+      
       const response = await client.bookings.searchAvailability({
         query: {
           filter: {
@@ -207,11 +205,9 @@ async function startServer() {
               endAt: end as string,
             },
             locationId: getLocFromReq(req),
-            segmentFilters: [
-              {
-                serviceVariationId: (serviceVariationId as string) || "ANY_SERVICE_VARIATION_ID",
-              }
-            ]
+            segmentFilters: ids.map(id => ({
+              serviceVariationId: id,
+            }))
           }
         }
       });
@@ -455,7 +451,7 @@ async function startServer() {
             version: existing?.version,
             itemData: {
               name: item.name,
-              description: item.description,
+              description: item.longDescription || item.shortDescription || item.description || '',
               categoryId: categoryIdMap[item.categoryId],
               productType: 'APPOINTMENTS_SERVICE',
               variations: variations as any,
@@ -484,16 +480,8 @@ async function startServer() {
         await catalog.batchDelete({ objectIds: toDeleteIds });
       }
 
-      // 5. Also trigger the Firestore Master Sync for total consistency
+      // 5. Removed Firestore Master Sync. Local codebase is the only source.
       let masterSyncMsg = "";
-      try {
-        console.log("🪵 Triggering Firestore Master Consistency Sweep...");
-        const masterRes = await syncAllFirestoreToSquare(req.headers['x-square-access-token'] as string);
-        masterSyncMsg = ` Also synced ${masterRes.syncedCount} Master items and pruned ${masterRes.prunedCount} orphans.`;
-      } catch (err) {
-        console.error("Master Sync failed:", err);
-        masterSyncMsg = " Master sync failed, check logs.";
-      }
 
       res.json({ 
         success: true, 
@@ -584,67 +572,8 @@ async function startServer() {
   // List all services from Master DB
   app.get("/api/admin/services", async (req, res) => {
     try {
-      const snapshot = await db.collection('services').orderBy('name').get();
-      const services = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.json(services);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Create new service (Master Truth)
-  app.post("/api/admin/services", async (req, res) => {
-    try {
-      const data = req.body;
-      const ref = await db.collection('services').add({
-        ...data,
-        active: true,
-        syncStatus: 'pending',
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      
-      // Auto-sync to Square
-      const syncResult = await syncServiceToSquare(ref.id, req.headers['x-square-access-token'] as string);
-      
-      res.json({ id: ref.id, syncResult });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Update existing service (Master Truth)
-  app.patch("/api/admin/services/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-      await db.collection('services').doc(id).update({
-        ...req.body,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-
-      // Force Push to Square
-      const syncResult = await syncServiceToSquare(id, req.headers['x-square-access-token'] as string);
-      res.json({ success: true, syncResult });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Delete service (Master Truth)
-  app.delete("/api/admin/services/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-      const doc = await db.collection('services').doc(id).get();
-      const squareId = doc.data()?.squareId;
-      
-      await db.collection('services').doc(id).delete();
-      
-      // Remove from Square if exists
-      if (squareId) {
-        await deleteServiceFromSquare(squareId, req.headers['x-square-access-token'] as string);
-      }
-      
-      res.json({ success: true });
+      // Return static services since we removed Firestore Admin duties
+      res.json(SERVICES);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -658,17 +587,7 @@ async function startServer() {
     res.status(200).send("OK");
 
     if (type === 'catalog.version.updated') {
-      console.log('🔔 Square Catalog Change Detected. Checking for drift...');
-      // Note: Data.object contains the modified object
-      // We check if it's one of ours and if we need to revert it
-      try {
-        const obj = data.object?.catalog_object;
-        if (obj?.type === 'ITEM') {
-          await autoCorrectCatalogDrift(obj.id, BigInt(obj.version));
-        }
-      } catch (err) {
-        console.error("Webhook auto-correction failed:", err);
-      }
+      console.log('🔔 Square Catalog Change Detected. Server auto-correction is currently disabled.');
     }
   });
 
@@ -845,14 +764,8 @@ async function startServer() {
   // Admin Logs Endpoint
   app.get("/api/admin/logs", async (req, res) => {
     try {
-      const { limit = 30 } = req.query;
-      const snapshot = await db.collection('system_logs')
-        .orderBy('timestamp', 'desc')
-        .limit(Number(limit))
-        .get();
-      
-      const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.json(logs);
+      // Mock logs response since Firestore logs are disabled
+      res.json([]);
     } catch (error: any) {
       console.error("Failed to fetch logs:", error);
       res.status(500).json({ error: "Failed to fetch logs" });

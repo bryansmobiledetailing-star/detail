@@ -659,6 +659,12 @@ export default function Admin() {
                     <h3 className="text-lg font-black italic tracking-tight mb-4">Deep Links</h3>
                     <ul className="space-y-4">
                         <li>
+                            <Link to="/admin/services" className="flex items-center justify-between p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-colors">
+                                <span className="text-sm font-bold text-zinc-200">Service Manager</span>
+                                <FileText className="h-4 w-4 text-emerald-500" />
+                            </Link>
+                        </li>
+                        <li>
                             <Link to="/admin/blog" className="flex items-center justify-between p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-colors">
                                 <span className="text-sm font-bold text-zinc-200">Blog Manager</span>
                                 <FileText className="h-4 w-4 text-emerald-500" />

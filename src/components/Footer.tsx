@@ -51,12 +51,12 @@ export default function Footer() {
         <div className="space-y-4">
           <h4 className="text-zinc-100 font-medium tracking-wide uppercase text-sm">Services</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/services/interior-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Interior Detailing</Link></li>
-            <li><Link to="/services/exterior-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Exterior Detailing</Link></li>
-            <li><Link to="/services/paint-correction" className="block py-1 hover:text-zinc-100 transition-colors">Paint Correction</Link></li>
-            <li><Link to="/services/ceramic-coating" className="block py-1 hover:text-zinc-100 transition-colors">Ceramic Coating</Link></li>
-            <li><Link to="/services/full-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Full Detailing Packages</Link></li>
-            <li><Link to="/services/rv-boat-detailing" className="block py-1 hover:text-zinc-100 transition-colors">RV, Boat & Equipment Detailing</Link></li>
+            <li><Link to="/services/category/interior-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Interior Detailing</Link></li>
+            <li><Link to="/services/category/exterior-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Exterior Detailing</Link></li>
+            <li><Link to="/services/category/paint-correction" className="block py-1 hover:text-zinc-100 transition-colors">Paint Correction</Link></li>
+            <li><Link to="/services/category/ceramic-coating" className="block py-1 hover:text-zinc-100 transition-colors">Ceramic Coating</Link></li>
+            <li><Link to="/services/category/full-detailing" className="block py-1 hover:text-zinc-100 transition-colors">Full Detailing Packages</Link></li>
+            <li><Link to="/services/category/rv-boat-detailing" className="block py-1 hover:text-zinc-100 transition-colors">RV, Boat & Equipment Detailing</Link></li>
           </ul>
         </div>
 

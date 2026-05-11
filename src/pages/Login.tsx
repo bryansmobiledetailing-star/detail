@@ -25,12 +25,16 @@ export default function Login() {
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
-      if (result.user.email !== 'bryansmobiledetailing@gmail.com') {
+      if (result.user.email?.toLowerCase() !== 'bryansmobiledetailing@gmail.com') {
         setError('Unauthorized access. This area is restricted to system administrators.');
         await auth.signOut();
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in');
+      if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        setError(null);
+      } else {
+        setError(err.message || 'Failed to sign in');
+      }
     } finally {
       setLoading(false);
     }

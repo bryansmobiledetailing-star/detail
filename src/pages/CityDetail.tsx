@@ -114,7 +114,7 @@ export default function CityDetail() {
                 <div>
                   <div className="flex items-center justify-between mb-6">
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">0{index + 1}</span>
-                    <Link to={`/services/detail/${service.id}`} className="text-zinc-300 group-hover:text-emerald-500 transition-colors">
+                    <Link to={`/services/${service.id}`} className="text-zinc-300 group-hover:text-emerald-500 transition-colors">
                       <ArrowRight className="h-5 w-5" />
                     </Link>
                   </div>
@@ -123,7 +123,7 @@ export default function CityDetail() {
                     {service.shortDescription}
                   </p>
                 </div>
-                <Link to={`/services/detail/${service.id}`} className="text-[10px] font-black uppercase tracking-widest text-emerald-600 group-hover:translate-x-2 transition-transform inline-flex items-center">
+                <Link to={`/services/${service.id}`} className="text-[10px] font-black uppercase tracking-widest text-emerald-600 group-hover:translate-x-2 transition-transform inline-flex items-center">
                   Learn More <ArrowRight className="h-3 w-3 ml-2" />
                 </Link>
               </motion.div>

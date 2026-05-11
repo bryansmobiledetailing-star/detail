@@ -22,14 +22,8 @@ export default function Navbar() {
     { name: 'Gallery', path: '/gallery' },
     { name: 'Blog', path: '/blog' },
     { name: 'FAQ', path: '/faq' },
+    { name: 'Admin', path: '/admin' },
   ];
-
-  if (isAdmin) {
-    // Add Admin link only for admins if not already there
-    if (!navLinks.find(l => l.path === '/admin')) {
-      navLinks.splice(navLinks.length - 1, 0, { name: 'Admin', path: '/admin' });
-    }
-  }
 
   const isActive = (path: string) => location.pathname === path;
 

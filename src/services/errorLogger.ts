@@ -1,16 +1,3 @@
-import admin from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
-
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    projectId: firebaseConfig.projectId,
-  });
-}
-
-const db = getFirestore(firebaseConfig.firestoreDatabaseId);
-
 export enum LogLevel {
   INFO = 'info',
   WARNING = 'warning',
@@ -23,7 +10,7 @@ export interface SystemLog {
   source: string;
   message: string;
   details?: any;
-  timestamp: admin.firestore.Timestamp | Date;
+  timestamp?: Date;
   context?: {
     userId?: string;
     path?: string;
@@ -36,12 +23,10 @@ export async function logToSystem(log: Omit<SystemLog, 'timestamp'>) {
   try {
     const logData = {
       ...log,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      timestamp: new Date(),
     };
 
-    console.log(`[${log.level.toUpperCase()}] [${log.source}] ${log.message}`);
-    
-    await db.collection('system_logs').add(logData);
+    console.log(`[${log.level.toUpperCase()}] [${log.source}] ${log.message}`, log.details || '');
   } catch (err) {
     console.error('CRITICAL: Failed to write to system_logs:', err);
   }

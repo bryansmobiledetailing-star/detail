@@ -11,7 +11,7 @@ function getAI() {
     if (!key) {
       throw new Error("GEMINI_API_KEY_MISSING");
     }
-    aiInstance = new GoogleGenAI(key);
+    aiInstance = new GoogleGenAI({ apiKey: key });
   }
   return aiInstance;
 }
