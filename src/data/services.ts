@@ -151,8 +151,8 @@ export const SERVICES: Service[] = [
     id: 'interior-detail',
     categoryId: 'interior-detailing',
     name: 'Signature Interior Detail',
-    shortDescription: 'Professional interior cleaning that eliminates buildup and light stains for a fresh, comfortable cabin.',
-    longDescription: 'Reclaim the comfort of your daily commute in Bellevue and Omaha. Our Signature Interior Detail is a professional deep-cleaning service that goes far beyond a quick vacuum. By thoroughly cleaning and sanitizing plastics, extracting light stains, and air-purging tight crevices, we eliminate everyday buildup and restore a crisp, clean, factory-fresh feel to your vehicle’s interior.',
+    shortDescription: 'White-glove interior detail eliminating buildup and light stains for a fresh, sophisticated cabin.',
+    longDescription: 'Reclaim the comfort of your daily commute in Bellevue and Omaha. Our Signature Interior Detail is a concierge-level deep-cleaning service that goes far beyond a quick vacuum. By thoroughly cleaning and sanitizing plastics, extracting light stains, and air-purging tight crevices, we eliminate everyday buildup and restore a crisp, clean, factory-fresh feel to your vehicle’s interior.',
     price: { car: 179, suv: 199, truck: 219, largeSuv: 249 },
     pricingType: 'fixed',
     squareName: 'Signature Interior Detail',
@@ -174,6 +174,7 @@ export const SERVICES: Service[] = [
     ],
     duration: '2-3.5 hours',
     bestFor: 'Daily drivers needing a professional reset and long-term surface protection.',
+    badge: 'Popular',
     image: 'https://images.unsplash.com/photo-1582139329536-e7228392ef23?auto=format&fit=crop&q=80&w=1200'
   },
   {
@@ -201,7 +202,8 @@ export const SERVICES: Service[] = [
     ],
     duration: '4-6 hours',
     bestFor: 'Neglected interiors, heavy pet hair, or used-cars needing a "Factory Fresh" feel.',
-    badge: 'Deep Restoration'
+    badge: 'Deep Restoration',
+    image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- EXTERIOR ---
@@ -209,8 +211,8 @@ export const SERVICES: Service[] = [
     id: 'exterior-enhancement',
     categoryId: 'exterior-detailing',
     name: 'Premium Wash & Wax',
-    shortDescription: 'Advanced decontamination wash & premium paint sealant for high-gloss protection.',
-    longDescription: 'Elevate your vehicle\'s curb appeal far beyond a standard car wash. Nebraska roads bombard your clear coat with iron fallout to brake dust. Our Premium Wash & Wax uses a technical chemical decontamination and clay bar treatment to pull embedded grit out of your paint, leaving it smooth-as-glass. We lock in the gloss with a hydrophobic silica sealant that protects against harsh weather for up to 6 months.',
+    shortDescription: 'Meticulous advanced decontamination wash & premium paint sealant for high-gloss protection.',
+    longDescription: 'Elevate your vehicle\'s curb appeal far beyond a standard car wash. Nebraska roads bombard your clear coat with iron fallout to brake dust. Our Premium Wash & Wax uses a technical chemical decontamination and clay bar treatment to pull embedded grit out of your paint, leaving it smooth-as-glass. We lock in the gloss with a premium hydrophobic silica sealant that protects against harsh weather for up to 6 months.',
     price: { car: 149, suv: 169, truck: 189, largeSuv: 209 },
     pricingType: 'fixed',
     squareName: 'Premium Wash & Wax',
@@ -219,14 +221,14 @@ export const SERVICES: Service[] = [
       description: 'Professional exterior car detailing in Bellevue. We utilize iron decontamination, clay bar treatments, and durable paint sealants for a high-gloss finish.'
     },
     features: [
-      'Deep foam hand wash (Two-bucket safety)',
-      'Wheels, barrels & wheel arches detailed',
-      'High-gloss tire dressing (No-sling formula)',
-      'Clay bar "Smooth-to-touch" treatment',
-      'Iron & Fallout chemical decontamination',
-      'Hydrophobic gloss sealant (6-month protection)',
-      'Exterior glass hydrophobic treatment',
-      'Trim restoration & UV protection'
+      'Concierge-Level Foam Hand Wash',
+      'Wheels, Barrels & Arches Deep Cleaned',
+      'High-Gloss Tire Dressing (No-sling formula)',
+      'Clay Bar "Smooth-to-touch" Treatment',
+      'Iron & Chemical Decontamination',
+      'Premium Hydrophobic Gloss Sealant (6-month)',
+      'Exterior Glass Hydrophobic Treatment',
+      'Trim Restoration & UV Protection'
     ],
     duration: '2-3 hours',
     bestFor: 'Ending the "rough paint" feel and adding a mirror-like protective shield.',
@@ -257,6 +259,8 @@ export const SERVICES: Service[] = [
     ],
     duration: '4-5 hours',
     bestFor: 'Maximum gloss and light defect removal without full correction.',
+    badge: 'Premium Enhancement',
+    image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- PAINT CORRECTION ---
@@ -273,9 +277,10 @@ export const SERVICES: Service[] = [
       title: 'Level 1 Paint Correction Bellevue NE | Swirl Removal Omaha',
       description: 'Erase swirl marks and scratches with professional Level 1 Paint Correction in Bellevue and Omaha. Achieve a brilliant, clear-coat mirror finish.'
     },
-    features: ['Single-Stage Machine Correction', 'Surface Decontamination', 'Gloss Restoration', 'Wipeout Inspection', 'Paint Depth Assessment'],
+    features: ['Precision Single-Stage Correction', 'Surface Decontamination', 'Gloss Restoration', 'Wipeout Inspection', 'Paint Depth Assessment'],
     duration: '6-8 hours',
-    bestFor: 'Newer vehicles or well-maintained paint.'
+    bestFor: 'Newer vehicles or well-maintained paint.',
+    image: 'https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'paint-correction-l2',
@@ -290,10 +295,12 @@ export const SERVICES: Service[] = [
       title: 'Two-Stage Paint Correction Bellevue NE | Deep Scratch Removal Omaha',
       description: 'Rescue your clear coat with our multi-stage Paint Correction in Bellevue and Omaha. Eliminate severe swirl marks and scratches for a breathtaking gloss.'
     },
-    features: ['Two-Stage Compounding & Polishing', 'Intensive Defect Removal', 'High-Clarity Finishing', 'Prep for Ceramic Coating', 'Detailed Surface Inspection'],
+    features: ['Intensive Two-Stage Compounding & Polishing', 'Intensive Defect Removal', 'High-Clarity Finishing', 'Prep for Ceramic Coating', 'Detailed Surface Inspection'],
     duration: '1-2 Days',
     bestFor: 'Older vehicles or paint with visible swirl marks.',
-    highlight: true
+    highlight: true,
+    badge: 'Ultimate Paint Restoration',
+    image: 'https://images.unsplash.com/photo-1632823465389-c4ac18002cf7?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- CERAMIC COATING ---
@@ -312,7 +319,9 @@ export const SERVICES: Service[] = [
     },
     features: ['3-Year Professional Grade Coating', 'Deep Hydrophobic Properties', 'UV Protection Barrier', 'Ease of Maintenance', 'Technical Prep Wash Included'],
     duration: '1-2 Days',
-    bestFor: 'Long-term shoppers on a budget.'
+    bestFor: 'Long-term shoppers on a budget.',
+    badge: 'Long-Term Protection',
+    image: 'https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'protection-package',
@@ -328,16 +337,17 @@ export const SERVICES: Service[] = [
       description: 'The ultimate auto detailing package for Bellevue and Omaha. Combine precision paint correction with a professional ceramic coating to guarantee flawless, long-term protection.'
     },
     features: [
-      'Full technical prep wash',
-      'Complete clay & decontamination',
-      'Precision paint correction',
-      'Professional ceramic coating application',
-      'Windshield & wheel face coating included'
+      'Bespoke Technical Prep Wash',
+      'Complete Clay & Decontamination',
+      'Precision Paint Correction',
+      'Professional Ceramic Coating Application',
+      'Windshield & Wheel Face Coating Included'
     ],
     duration: '2 Days',
     bestFor: 'New vehicles or those wanting the absolute best protection.',
     badge: 'Best Value',
-    highlight: true
+    highlight: true,
+    image: 'https://images.unsplash.com/photo-1554504101-7cb2fa1c1724?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- FULL DETAIL ---
@@ -364,6 +374,8 @@ export const SERVICES: Service[] = [
     ],
     duration: '1.5-2 hours',
     bestFor: 'Vehicles that are already well-maintained or detailed regularly.',
+    badge: 'Quick Refresh',
+    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'full-detail-package',
@@ -379,15 +391,16 @@ export const SERVICES: Service[] = [
       description: 'Transform your vehicle inside and out with our Signature Full Detail in Bellevue and Omaha. Combining elite interior cleaning with exterior decontamination.'
     },
     features: [
-      'Signature Interior Detail',
+      'Elite Signature Interior Detail',
       'Premium Exterior Wash & Wax',
       'Wheel & Tire Deep Clean',
-      'Bundle Savings Applied ✅',
+      'Exclusive Bundle Savings Applied ✅',
       'Complete 360-Degree Transformation'
     ],
     duration: '4-6 hours',
     bestFor: 'The essential bi-annual refresh for vehicles that deserve to look their best.',
-    badge: 'Best Value'
+    badge: 'Best Value',
+    image: 'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'showroom-package',
@@ -412,7 +425,8 @@ export const SERVICES: Service[] = [
     ],
     duration: '6-8 hours',
     bestFor: 'Pre-sale prep, used car purchases, or restoring the family "adventure" vehicle.',
-    highlight: true
+    highlight: true,
+    image: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- MAINTENANCE ---
@@ -439,6 +453,7 @@ export const SERVICES: Service[] = [
     ],
     duration: '1.5-2 hours',
     bestFor: 'Existing clients wanting to maintain their investment.',
+    image: 'https://images.unsplash.com/photo-1620055375841-7667ff4a193b?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- RV & BOAT ---
@@ -463,7 +478,8 @@ export const SERVICES: Service[] = [
       'Sealant or wax UV protection'
     ],
     duration: '4-6 hours',
-    isSpecialty: true
+    isSpecialty: true,
+    image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'rv-boat-oxidation',
@@ -487,7 +503,8 @@ export const SERVICES: Service[] = [
     ],
     duration: '1-2 Days',
     isSpecialty: true,
-    badge: 'Restoration'
+    badge: 'Restoration',
+    image: 'https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&q=80&w=1200'
   },
 
   // --- TRACTOR / FARM ---
@@ -512,7 +529,9 @@ export const SERVICES: Service[] = [
       'Glass clarity restore'
     ],
     duration: '3-6 hours',
-    isSpecialty: true
+    isSpecialty: true,
+    badge: 'Agricultural Heavy Detail',
+    image: 'https://images.unsplash.com/photo-1605151523450-cbccfb50e200?auto=format&fit=crop&q=80&w=1200'
   }
 ];
 

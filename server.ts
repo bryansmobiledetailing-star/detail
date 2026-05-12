@@ -136,6 +136,27 @@ async function startServer() {
   });
 
   // Fetch Services from Square Catalog
+  app.get("/api/catalog/debug", async (req, res) => {
+    try {
+      const client = getClientFromReq(req) as any;
+      const { catalog } = client;
+      
+      let objects: any[] = [];
+      let cursor: string | undefined = undefined;
+      
+      do {
+        const response: any = await catalog.list({ types: 'ITEM', cursor });
+        const resObjects = response.data || response.result?.objects || response.objects || [];
+        objects = objects.concat(resObjects);
+        cursor = response.response?.cursor || response.result?.cursor || response.cursor;
+      } while (cursor);
+
+      res.json(objects);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message || String(e) });
+    }
+  });
+
   app.get("/api/catalog/services", async (req, res) => {
     try {
       const client = getClientFromReq(req) as any;
@@ -146,10 +167,9 @@ async function startServer() {
       
       do {
         const response: any = await catalog.list({ types: 'ITEM', cursor });
-        if (response.objects) {
-          objects = objects.concat(response.objects);
-        }
-        cursor = response.cursor;
+        const resObjects = response.data || response.result?.objects || response.objects || [];
+        objects = objects.concat(resObjects);
+        cursor = response.response?.cursor || response.result?.cursor || response.cursor;
       } while (cursor);
 
       // Filter for items that are services and map them
@@ -352,10 +372,10 @@ async function startServer() {
           .trim();
       };
       
-      const existingItemsByNorm = new Map<string, { id: string; version?: bigint }>();
+      const existingItemsByNorm = new Map<string, any>();
       for (const obj of allObjects) {
         if (obj.isDeleted || obj.type !== 'ITEM') continue;
-        existingItemsByNorm.set(normalize(obj.itemData.name), { id: obj.id, version: obj.version });
+        existingItemsByNorm.set(normalize(obj.itemData.name), obj);
       }
 
       // Check for team members for availability
@@ -372,20 +392,25 @@ async function startServer() {
       // Sync categories first
       const categoryIdMap: Record<string, string> = {};
       for (const cat of CATEGORIES) {
-        const catNorm = normalize(cat.name);
-        const existingCat = allObjects.find(obj => obj.type === 'CATEGORY' && normalize(obj.categoryData.name) === catNorm);
-        
-        const upsertRes = await catalog.object.upsert({
-          idempotencyKey: `cat-${cat.id}-${syncTimestamp}`,
-          object: {
-            type: 'CATEGORY',
-            id: existingCat?.id || `#${cat.id}`,
-            version: existingCat?.version,
-            categoryData: { name: cat.name },
-          }
-        });
-        const finalId = upsertRes.catalogObject?.id;
-        if (finalId) categoryIdMap[cat.id] = finalId;
+        try {
+          const catNorm = normalize(cat.name);
+          const existingCat = allObjects.find(obj => obj.type === 'CATEGORY' && normalize(obj.categoryData.name) === catNorm);
+          
+          const upsertRes: any = await catalog.object.upsert({
+            idempotencyKey: `cat-${cat.id}-${syncTimestamp}`,
+            object: {
+              type: 'CATEGORY',
+              id: existingCat?.id || `#${cat.id}`,
+              version: existingCat?.version,
+              categoryData: { name: cat.name },
+            }
+          });
+          const finalId = upsertRes.result?.catalogObject?.id || upsertRes.catalogObject?.id;
+          console.log(`Synced category ${cat.name} -> ${finalId}`);
+          if (finalId) categoryIdMap[cat.id] = finalId;
+        } catch (catError: any) {
+          console.error(`Error syncing category ${cat.name}:`, catError);
+        }
       }
 
       let syncedCount = 0;
@@ -393,75 +418,96 @@ async function startServer() {
       const syncedItemIds = new Set<string>();
 
       for (const item of allItems as any[]) {
-        const norm = normalize(item.name);
-        const existing = existingItemsByNorm.get(norm);
-        
-        // Calculate duration logic
-        let durationMinutes = 60;
-        if (item.duration) {
-          const durStr = typeof item.duration === 'string' ? item.duration : (item.duration.car || Object.values(item.duration)[0]);
-          const match = durStr.match(/(\d+)/);
-          if (match) {
-            durationMinutes = parseInt(match[1]);
-            if (durStr.toLowerCase().includes('hour') || durStr.toLowerCase().includes('hr')) {
-              durationMinutes *= 60;
+        try {
+          const norm = normalize(item.name);
+          const existing = existingItemsByNorm.get(norm);
+          
+          // Calculate duration logic
+          let durationMinutes = 60;
+          if (item.duration) {
+            const durStr = typeof item.duration === 'string' ? item.duration : (item.duration.car || Object.values(item.duration)[0]);
+            const match = durStr.match(/(\d+)/);
+            if (match) {
+              durationMinutes = parseInt(match[1]);
+              if (durStr.toLowerCase().includes('hour') || durStr.toLowerCase().includes('hr')) {
+                durationMinutes *= 60;
+              }
             }
           }
-        }
 
-        const variations = item.isAddon ? [{
-          type: 'ITEM_VARIATION',
-          id: `#var-${item.id}`,
-          itemVariationData: {
-            name: 'Standard',
-            pricingType: 'FIXED_PRICING',
-            serviceDuration: BigInt(durationMinutes * 60 * 1000),
-            availableForBooking: true,
-            priceMoney: {
-              amount: BigInt(item.price * 100),
-              currency: 'USD',
-            },
-            ...(teamMemberIds.length > 0 ? { teamMemberIds } : {}),
-          },
-        }] : (item.isSpecialty ? SPECIALTY_SIZES : VEHICLE_SIZES).map(size => {
-          const price = item.price[size.id];
-          if (price === undefined) return null;
-          return {
+          const getVarId = (varName: string, fallback: string) => {
+            if (!existing?.itemData?.variations) return fallback;
+            const match = existing.itemData.variations.find((v: any) => v.itemVariationData?.name === varName);
+            return match ? match.id : fallback;
+          };
+          
+          const getVarVersion = (varName: string) => {
+            if (!existing?.itemData?.variations) return undefined;
+            const match = existing.itemData.variations.find((v: any) => v.itemVariationData?.name === varName);
+            return match ? match.version : undefined;
+          };
+
+          const variations = item.isAddon ? [{
             type: 'ITEM_VARIATION',
-            id: `#var-${item.id}-${size.id}`,
+            id: getVarId('Standard', `#var-${item.id}`),
+            version: getVarVersion('Standard'),
             itemVariationData: {
-              name: size.name,
+              itemId: existing?.id,
+              name: 'Standard',
               pricingType: 'FIXED_PRICING',
               serviceDuration: BigInt(durationMinutes * 60 * 1000),
               availableForBooking: true,
               priceMoney: {
-                amount: BigInt(price * 100),
+                amount: BigInt(item.price * 100),
                 currency: 'USD',
               },
               ...(teamMemberIds.length > 0 ? { teamMemberIds } : {}),
             },
-          };
-        }).filter(Boolean);
+          }] : (item.isSpecialty ? SPECIALTY_SIZES : VEHICLE_SIZES).map(size => {
+            const price = item.price[size.id];
+            if (price === undefined) return null;
+            return {
+              type: 'ITEM_VARIATION',
+              id: getVarId(size.name, `#var-${item.id}-${size.id}`),
+              version: getVarVersion(size.name),
+              itemVariationData: {
+                itemId: existing?.id,
+                name: size.name,
+                pricingType: 'FIXED_PRICING',
+                serviceDuration: BigInt(durationMinutes * 60 * 1000),
+                availableForBooking: true,
+                priceMoney: {
+                  amount: BigInt(price * 100),
+                  currency: 'USD',
+                },
+                ...(teamMemberIds.length > 0 ? { teamMemberIds } : {}),
+              },
+            };
+          }).filter(Boolean);
 
-        const upsertRes = await catalog.object.upsert({
-          idempotencyKey: `item-${item.id}-${syncTimestamp}`,
-          object: {
-            type: 'ITEM',
-            id: existing?.id || `#${item.id}`,
-            version: existing?.version,
-            itemData: {
-              name: item.name,
-              description: item.longDescription || item.shortDescription || item.description || '',
-              categoryId: categoryIdMap[item.categoryId],
-              productType: 'APPOINTMENTS_SERVICE',
-              variations: variations as any,
+          const upsertRes: any = await catalog.object.upsert({
+            idempotencyKey: `item-${item.id}-${syncTimestamp}`,
+            object: {
+              type: 'ITEM',
+              id: existing?.id || `#${item.id}`,
+              version: existing?.version,
+              itemData: {
+                name: item.name,
+                description: item.longDescription || item.shortDescription || item.description || '',
+                categoryId: categoryIdMap[item.categoryId],
+                productType: 'APPOINTMENTS_SERVICE',
+                variations: variations as any,
+              },
             },
-          },
-        });
+          });
 
-        const finalId = upsertRes.catalogObject?.id;
-        if (finalId) syncedItemIds.add(finalId);
-        syncedCount++;
+          const finalId = upsertRes.result?.catalogObject?.id || upsertRes.catalogObject?.id;
+          console.log(`Synced item ${item.name} -> ${finalId}`);
+          if (finalId) syncedItemIds.add(finalId);
+          syncedCount++;
+        } catch (itemError: any) {
+           console.error(`Error syncing item ${item.name}:`, itemError.message || itemError);
+        }
       }
 
       // 4. PRUNING: Delete items in Square that are NOT in our local synced set
@@ -601,8 +647,9 @@ async function startServer() {
       let cursor: string | undefined = undefined;
       do {
         const response: any = await catalog.list({ types: 'CATEGORY,ITEM', cursor });
-        if (response.objects) objects = objects.concat(response.objects);
-        cursor = response.cursor;
+        const resObjects = response.data || response.result?.objects || response.objects || [];
+        objects = objects.concat(resObjects);
+        cursor = response.response?.cursor || response.result?.cursor || response.cursor;
       } while (cursor);
       
       const normalize = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
@@ -714,9 +761,30 @@ async function startServer() {
         apiKey = process.env.GOOGLE_MAPS_API_KEY as string;
       }
 
+      if (apiKey) {
+        // Extract the actual API key if the user accidentally pasted extra text (e.g. 'Your API key \\n AIza...')
+        const match = apiKey.match(/AIza[0-9A-Za-z-_]{35}/);
+        if (match) {
+          apiKey = match[0];
+        } else {
+          apiKey = apiKey.trim();
+        }
+        
+        // Prevent using dummy/example API keys which cause INVALID_ARGUMENT
+        if (apiKey === 'AIzaSyBErRJQlv_6xDS275QyFJ3sGX4OpeetiOU' || apiKey === 'AIzaSyCJvg2Qlc8AyKI2AkGvluIIUt2KXIQqnxo') {
+          apiKey = '';
+        }
+      }
+
       let placeId = req.headers['x-google-place-id'] as string;
       if (!placeId || placeId === 'undefined' || placeId === 'null' || placeId === '') {
         placeId = process.env.GOOGLE_PLACE_ID as string;
+      }
+      
+      if (placeId) {
+         placeId = placeId.trim();
+      } else {
+         placeId = 'ChIJVVU5ibSJk4cRCK2ex-dRYIg'; // Fallback to Bryan's Showroom Quality Mobile Detailing
       }
 
       if (!apiKey || !placeId || placeId === 'undefined' || apiKey === 'undefined' || placeId === 'null' || apiKey === 'null') {

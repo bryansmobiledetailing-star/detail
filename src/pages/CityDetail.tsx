@@ -31,7 +31,7 @@ export default function CityDetail() {
     "image": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=2000",
     "description": city.seo.description,
     "url": `https://bryansdetailing.com/service-areas/${city.slug}`,
-    "telephone": "123-456-7890", // Replace 
+    "telephone": "+17123056313",
     "priceRange": "$$",
     "areaServed": {
       "@type": "City",

@@ -19,21 +19,29 @@ const TRANSFORMATIONS = [
 ];
 
 const GALLERY_IMAGES = [
-  { id: 1, src: '/20191020_121957.jpg', category: 'interior', alt: 'Clean car interior' },
-  { id: 2, src: '/20191020_165304.jpg', category: 'exterior', alt: 'Glossy car exterior' },
-  { id: 3, src: '/20191020_165120.jpg', category: 'paint', alt: 'Paint correction progress' },
-  { id: 4, src: '/20191103_010853.jpg', category: 'ceramic', alt: 'Ceramic coating gloss' },
-  { id: 5, src: '/20191020_110332.jpg', category: 'interior', alt: 'Detailed cabin' },
-  { id: 6, src: '/20191020_062851.jpg', category: 'exterior', alt: 'Freshly washed vehicle' },
-  { id: 7, src: '/20191020_165130.jpg', category: 'paint', alt: 'Surface reflection' },
-  { id: 8, src: '/20191020_165218.jpg', category: 'exterior', alt: 'Showroom finish' },
-  { id: 9, src: '/20191020_165146.jpg', category: 'paint', alt: 'Detailing focus' },
-  { id: 10, src: '/20191020_122005.jpg', category: 'interior', alt: 'Spotless seats' },
-  { id: 11, src: '/20191020_062857.jpg', category: 'exterior', alt: 'Vehicle cleanup' },
-  { id: 12, src: '/20191020_165125.jpg', category: 'paint', alt: 'Correction in progress' },
-  { id: 13, src: '/20191020_165133.jpg', category: 'exterior', alt: 'Detailing step' },
-  { id: 14, src: '/20191020_165137.jpg', category: 'paint', alt: 'Mirror reflection' },
-  { id: 15, src: '/20191020_165149.jpg', category: 'exterior', alt: 'Final wipe down' },
+  { id: 1, src: '/20191020_121957.jpg', category: 'interior', alt: 'Clean car interior detailing Omaha Bellevue' },
+  { id: 2, src: '/20191020_165304.jpg', category: 'exterior', alt: 'Glossy car exterior auto detailing Nebraska' },
+  { id: 3, src: '/20191020_165120.jpg', category: 'paint', alt: 'Paint correction progress scratch removal Bellevue' },
+  { id: 4, src: '/20191103_010853.jpg', category: 'ceramic', alt: 'Ceramic coating gloss protection Omaha' },
+  { id: 5, src: '/20191020_110332.jpg', category: 'interior', alt: 'Detailed cabin interior cleaning Omaha' },
+  { id: 6, src: '/20191020_062851.jpg', category: 'exterior', alt: 'Freshly washed vehicle exterior detail Bellevue' },
+  { id: 7, src: '/20191020_165130.jpg', category: 'paint', alt: 'Surface reflection paint polishing Omaha NE' },
+  { id: 8, src: '/20191020_165218.jpg', category: 'exterior', alt: 'Showroom finish auto detailing near me' },
+  { id: 9, src: '/20191020_165146.jpg', category: 'paint', alt: 'Detailing focus paint restoration Bellevue' },
+  { id: 10, src: '/20191020_122005.jpg', category: 'interior', alt: 'Spotless seats upholstery cleaning Omaha' },
+  { id: 11, src: '/20191020_062857.jpg', category: 'exterior', alt: 'Vehicle cleanup mobile detailing Omaha' },
+  { id: 12, src: '/20191020_165125.jpg', category: 'paint', alt: 'Correction in progress car paint repair' },
+  { id: 13, src: '/20191020_165133.jpg', category: 'exterior', alt: 'Detailing step professional car wash Bellevue' },
+  { id: 14, src: '/20191020_165137.jpg', category: 'paint', alt: 'Mirror reflection paint correction Omaha' },
+  { id: 15, src: '/20191020_165149.jpg', category: 'exterior', alt: 'Final wipe down showroom shine Bellevue' },
+  { id: 16, src: '/FB_IMG_1571796997570.jpg', category: 'exterior', alt: 'Exterior detailing result hand wash Omaha' },
+  { id: 17, src: '/FB_IMG_1571796999524.jpg', category: 'paint', alt: 'Paint reflection after correction auto detail' },
+  { id: 18, src: '/IMG_20210907_193919.jpg', category: 'interior', alt: 'Vehicle interior detailing vacuuming seats' },
+  { id: 19, src: '/IMG_20210907_193940.jpg', category: 'interior', alt: 'Cleaned dashboard and seats deep interior detail' },
+  { id: 20, src: '/20200419_013025-COLLAGE~2.jpg', category: 'exterior', alt: 'Auto detailing compilation Bellevue NE' },
+  { id: 21, src: '/20211009_021727-COLLAGE.jpg', category: 'interior', alt: 'Before and after interior cleaning detailer Omaha' },
+  { id: 22, src: '/20211009_025807-COLLAGE.jpg', category: 'exterior', alt: 'Before and after exterior detail transformation' },
+  { id: 23, src: '/20211009_025807-COLLAGE~3.jpg', category: 'paint', alt: 'Paint restoration results scratch removal Bellevue' },
 ];
 
 const CATEGORIES = [
@@ -44,6 +52,8 @@ const CATEGORIES = [
   { id: 'ceramic', label: 'Ceramic Coating' },
 ];
 
+import { Helmet } from 'react-helmet-async';
+
 export default function Gallery() {
   const [filter, setFilter] = useState('all');
 
@@ -53,6 +63,11 @@ export default function Gallery() {
 
   return (
     <div className="min-h-screen bg-zinc-50 py-16">
+      <Helmet>
+        <title>Portfolio & Auto Detailing Gallery | Bryan's Detailing Omaha & Bellevue</title>
+        <meta name="description" content="View our portfolio of premium auto detailing, paint correction, interior restorations, and ceramic coating projects completed in Bellevue and Omaha." />
+        <link rel="canonical" href="https://bryansdetailing.com/gallery" />
+      </Helmet>
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12 space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900">Our Work</h1>

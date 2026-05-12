@@ -26,7 +26,7 @@ export default function Home() {
     "description": "Premium mobile and shop-based auto detailing services in Bellevue & Omaha. Ceramic coating, paint correction, interior restoration, and specialty RV/Boat detailing.",
     "@id": "https://bryansdetailing.com",
     "url": "https://bryansdetailing.com",
-    "telephone": "123-456-7890", // Replace with real phone
+    "telephone": "712-305-6313",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Bellevue",
