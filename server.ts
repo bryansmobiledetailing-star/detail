@@ -771,7 +771,7 @@ async function startServer() {
         }
         
         // Prevent using dummy/example API keys which cause INVALID_ARGUMENT
-        if (apiKey === 'AIzaSyBErRJQlv_6xDS275QyFJ3sGX4OpeetiOU' || apiKey === 'AIzaSyCJvg2Qlc8AyKI2AkGvluIIUt2KXIQqnxo') {
+        if (apiKey.includes('BErRJQlv_6xDS') || apiKey.includes('CJvg2Qlc8AyKI')) {
           apiKey = '';
         }
       }

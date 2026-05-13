@@ -389,7 +389,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-32 bg-zinc-900 text-white text-center relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-10">
-           <img src="/20191102_005503.jpg" className="w-full h-full object-cover" alt="Detailing background" />
+           <img src="/IMG_20210907_193919.jpg" className="w-full h-full object-cover" alt="Detailing background" />
         </div>
         <div className="container mx-auto px-4 max-w-4xl relative z-10 space-y-12">
           <div className="space-y-6">
